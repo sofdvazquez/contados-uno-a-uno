@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Animales matados en mataderos de España, 2004–2026. Datos oficiales del MAPA. / Animals killed in Spain's slaughterhouses, 2004–2026. Official MAPA data.">
+<meta name="author" content="Sofía Díaz Vázquez">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Contados uno a uno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column like an official ledger, with wide figures breaking out for charts */
+:root {
+  --bg: #f2f3f1;
+  --surface: #fbfbfa;
+  --ink: #161c19;
+  --ink-2: #4b524e;
+  --ink-3: #7a807c;
+  --rule: #d9dcd8;
+  --mark: #962a3c;
+  --mark-soft: #e9d3d6;
+  --grid: #e4e6e2;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121614; --surface: #1a1f1c; --ink: #eef0ed; --ink-2: #b9bfba; --ink-3: #8a918c;
+    --rule: #2e3531; --mark: #e2788a; --mark-soft: #3d2328; --grid: #262c28; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121614; --surface: #1a1f1c; --ink: #eef0ed; --ink-2: #b9bfba; --ink-3: #8a918c;
+  --rule: #2e3531; --mark: #e2788a; --mark-soft: #3d2328; --grid: #262c28; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; padding-inline: 20px; padding-block: 0 64px; }
+.wrap { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 72px; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.05; }
+h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; font-stretch: 85%; letter-spacing: -0.01em; }
+p { margin: 0; max-width: 65ch; }
+.lede { color: var(--ink-2); }
+.label { font-family: var(--font-data); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--ink); text-decoration-color: var(--mark); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--mark); outline-offset: 2px; }
+
+/* top bar */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-block: 20px; border-bottom: 1px solid var(--rule); }
+.lang { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; }
+.lang button { font: 500 0.8rem var(--font-data); background: transparent; color: var(--ink-2); border: 0; padding: 6px 14px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* hero */
+.hero { display: flex; flex-direction: column; gap: 20px; padding-top: 24px; }
+.hero h1 { font-size: clamp(3.4rem, 14vw, 8.5rem); font-weight: 800; font-stretch: 62%; letter-spacing: -0.02em; line-height: 0.9; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.hero .sub { font-family: var(--font-display); font-size: clamp(1.25rem, 3.4vw, 1.75rem); font-weight: 500; font-stretch: 90%; max-width: 46ch; line-height: 1.2; }
+.hero .sub span { display: block; }
+.ticker { display: flex; flex-wrap: wrap; gap: 12px 32px; padding: 20px 0; border-block: 1px solid var(--rule); }
+.ticker > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ticker strong { font-family: var(--font-display); font-size: 2rem; font-weight: 700; font-stretch: 75%; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.ticker .live strong { color: var(--mark); }
+
+/* sections */
+section { display: flex; flex-direction: column; gap: 20px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font: 500 0.82rem var(--font-body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+select { font: 500 0.85rem var(--font-body); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); }
+.figure { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; position: relative; min-width: 0; }
+.figure svg { display: block; width: 100%; height: auto; overflow: visible; }
+.figure text { fill: var(--ink-2); font-family: var(--font-data); font-size: 12px; }
+.figure .val { fill: var(--ink); font-weight: 500; }
+.figure .cat { fill: var(--ink); font-family: var(--font-body); font-size: 13px; }
+.figure .gridline { stroke: var(--grid); stroke-width: 1; }
+.figure .axis { stroke: var(--rule); stroke-width: 1; }
+.bar { fill: var(--mark); }
+.bar.dc { fill: none; }
+.hit { fill: transparent; cursor: default; }
+.hit:hover + .bar, .row:hover .bar { opacity: 0.8; }
+.line { fill: none; stroke: var(--mark); stroke-width: 2; }
+.area { fill: var(--mark-soft); }
+.dot { fill: var(--mark); stroke: var(--surface); stroke-width: 2; }
+.ghost { fill: none; stroke: var(--ink-3); stroke-width: 1.25; opacity: 0.45; }
+.cross { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.note { font-size: 0.85rem; color: var(--ink-3); }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; max-width: 240px; z-index: 2; }
+.tip b { font-family: var(--font-data); font-weight: 500; }
+
+/* region table toggle */
+details { border-top: 1px solid var(--rule); padding-top: 12px; }
+summary { cursor: pointer; font-size: 0.9rem; color: var(--ink-2); }
+.tbl { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; font-size: 0.85rem; width: 100%; }
+th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; }
+th { font-family: var(--font-data); font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+
+/* compare 2026 */
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.compare > div { display: flex; flex-direction: column; gap: 4px; padding: 16px 0; border-top: 2px solid var(--ink); }
+.compare strong { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; font-stretch: 75%; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+/* method */
+.method { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px 32px; }
+.method div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.method h3 { font: 600 1rem var(--font-body); margin: 0; }
+.method p { font-size: 0.92rem; color: var(--ink-2); }
+footer { border-top: 1px solid var(--rule); padding-top: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--ink-3); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="label" data-i18n="kicker">España · datos oficiales del MAPA</span>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" id="lang-es" aria-pressed="true">ES</button>
+      <button type="button" id="lang-en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="label" data-i18n="heroLabel">Animales matados en mataderos de España en 2025</span>
+    <h1 class="num" id="heroNum">985.393.307</h1>
+    <p class="sub"><span data-i18n="heroSub1">Cada cifra de esta página es un individuo.</span><span data-i18n="heroSub2">Y los peces no están incluidos.</span></p>
+    <div class="ticker">
+      <div><span class="label" data-i18n="perDay">Al día</span><strong id="perDay">2,7 M</strong></div>
+      <div><span class="label" data-i18n="perSec">Por segundo</span><strong id="perSec">31</strong></div>
+      <div class="live"><span class="label" data-i18n="since">Desde que abriste esta página</span><strong id="since" aria-live="off">0</strong></div>
+    </div>
+  </div>
+
+  <section id="species">
+    <h2 data-i18n="spTitle">Quiénes son</h2>
+    <p class="lede" data-i18n="spLede">Animales matados en 2025, por especie, en miles (56.005 mil = 56 millones). Las aves son casi 9 de cada 10.</p>
+    <div class="figure" id="spFig"><svg id="spSvg" role="img" aria-labelledby="spSvgT"><title id="spSvgT">Animals killed in 2025 by species</title></svg></div>
+  </section>
+
+  <section id="trend">
+    <h2 data-i18n="trTitle">Desde 2004</h2>
+    <p class="lede" data-i18n="trLede">Elige una especie.</p>
+    <div class="lang" id="trMode" role="group" aria-label="View" style="align-self:flex-start">
+      <button type="button" data-mode="count" aria-pressed="true">Número de animales</button>
+      <button type="button" data-mode="index" aria-pressed="false">Cambio en %</button>
+    </div>
+    <div class="controls" id="trChips" role="group" aria-label="Species"></div>
+    <div class="figure" id="trFig"><svg id="trSvg" role="img" aria-labelledby="trSvgT"><title id="trSvgT">Trend 2004–2025</title></svg></div>
+    <p class="note" id="trNote"></p>
+  </section>
+
+  <section id="regions">
+    <h2 data-i18n="rgTitle">Dónde ocurre</h2>
+    <p class="lede" data-i18n="rgLede">Por comunidad autónoma, en miles de animales. Elige una especie y un año.</p>
+    <p class="lede" id="rgFact" hidden></p>
+    <div class="controls">
+      <label for="rgSpecies" class="label" data-i18n="species">Especie</label>
+      <select id="rgSpecies"></select>
+      <label for="rgYear" class="label" data-i18n="year">Año</label>
+      <select id="rgYear"></select>
+    </div>
+    <div class="figure" id="rgFig"><svg id="rgSvg" role="img" aria-labelledby="rgSvgT"><title id="rgSvgT">Animals killed by region</title></svg></div>
+    <p class="note" id="rgNote"></p>
+    <details>
+      <summary data-i18n="tableToggle">Ver como tabla</summary>
+      <div class="tbl"><table id="rgTable"></table></div>
+    </details>
+  </section>
+
+  <section id="now">
+    <h2 data-i18n="nowTitle">2026 hasta ahora</h2>
+    <p class="lede" data-i18n="nowLede">Enero a agosto, datos provisionales del boletín mensual.</p>
+    <div class="compare">
+      <div><span class="label" data-i18n="c26">Ene–ago 2026</span><strong id="c26"></strong></div>
+      <div><span class="label" data-i18n="c25">Ene–ago 2025</span><strong id="c25"></strong></div>
+      <div><span class="label" data-i18n="cDiff">Diferencia</span><strong id="cDiff"></strong></div>
+    </div>
+  </section>
+
+  <section id="method">
+    <h2 data-i18n="mTitle">Cómo se hizo</h2>
+    <div class="method">
+      <div><h3 data-i18n="m1h">La fuente</h3><p data-i18n="m1p">La Encuesta de sacrificio de ganado del Ministerio de Agricultura (MAPA), que pregunta cada mes a los mataderos cuántos animales matan. Tablas anuales 2004–2025 y boletín mensual de agosto de 2026.</p></div>
+      <div><h3 data-i18n="m2h">Qué no aparece</h3><p data-i18n="m2p">Los peces y otros animales acuáticos no están en esta encuesta, y las estadísticas de pesca se publican en toneladas, no en individuos. Tampoco aparecen los animales que mueren antes de llegar al matadero.</p></div>
+      <div><h3 data-i18n="m3h">Datos confidenciales</h3><p data-i18n="m3p">El MAPA oculta algunas cifras regionales (marcadas «DC») para que no se pueda identificar a un matadero concreto. Aquí se muestran como confidenciales, nunca como cero. Por eso la suma de las regiones es menor que el total de España.</p></div>
+      <div><h3 data-i18n="m4h">Unidades y totales</h3><p data-i18n="m4p">Hasta 2024 el MAPA da las aves y los conejos en miles; aquí todo está en animales individuales. Todas las cifras son de animales matados en mataderos. No incluyen la estimación de «otros sacrificios» fuera de los mataderos, porque el MAPA cambió cómo la calcula y no se puede comparar entre años.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <span><span data-i18n="src">Fuente:</span> <a href="https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/ganaderia/encuestas-sacrificio-ganado" target="_blank" rel="noopener">MAPA, Encuesta de sacrificio de ganado</a></span>
+    <span data-i18n="credit">Proyecto de Sofía Díaz Vázquez. Datos limpiados con Python (pandas).</span>
+  </footer>
+</div>
+
+<script>
+const DATA = {"nat":{"AVES":{"2004":679399954,"2005":684362551,"2006":658686285,"2007":712306746,"2008":694890618,"2009":675446265,"2010":695065779,"2011":703727390,"2012":703865343,"2013":685538537,"2014":720093857,"2015":736455000,"2016":764538198,"2017":754383627,"2018":799605625,"2019":817320861,"2020":799848314,"2021":787312516,"2022":793280835,"2023":810767450,"2024":867110576,"2025":892656690},"PORCINO":{"2004":37064263,"2005":38322018,"2006":38810749,"2007":41488545,"2008":41395592,"2009":40117902,"2010":40847016,"2011":41743363,"2012":41594556,"2013":41418466,"2014":43483573,"2015":45890524,"2016":49083785,"2017":50072755,"2018":52289200,"2019":52982314,"2020":56130028,"2021":58370485,"2022":56271143,"2023":53094992,"2024":53888694,"2025":56005058},"CONEJOS":{"2004":46049883,"2005":45112727,"2006":45624769,"2007":47121095,"2008":42501220,"2009":42421484,"2010":44855370,"2011":44884867,"2012":45518164,"2013":44716533,"2014":44594206,"2015":44213634,"2016":41338475,"2017":39401567,"2018":37630197,"2019":35657318,"2020":36198266,"2021":34979699,"2022":30840342,"2023":28440328,"2024":27454321,"2025":25928648},"OVINO":{"2004":14466613,"2005":13950245,"2006":14927783,"2007":14578929,"2008":12555904,"2009":11392264,"2010":11735997,"2011":11377295,"2012":10518668,"2013":10312037,"2014":9928191,"2015":9960176,"2016":10112327,"2017":9833126,"2018":10105707,"2019":10060045,"2020":9563679,"2021":9711254,"2022":9366463,"2023":8370897,"2024":7899695,"2025":7521246},"BOVINO":{"2004":2732046,"2005":2757558,"2006":2599095,"2007":2427983,"2008":2506734,"2009":2306595,"2010":2302089,"2011":2314752,"2012":2285924,"2013":2222003,"2014":2182590,"2015":2333895,"2016":2373850,"2017":2391003,"2018":2462557,"2019":2510774,"2020":2422405,"2021":2552368,"2022":2605504,"2023":2450507,"2024":2483573,"2025":2383979},"CAPRINO":{"2004":1385806,"2005":1105279,"2006":1412846,"2007":1306020,"2008":1154508,"2009":1172767,"2010":1375864,"2011":1422596,"2012":1307087,"2013":1213751,"2014":1130215,"2015":1210269,"2016":1306444,"2017":1358402,"2018":1371026,"2019":1303400,"2020":1209484,"2021":1175573,"2022":1273034,"2023":1151538,"2024":1056339,"2025":868388},"EQUINO":{"2004":25481,"2005":27610,"2006":27756,"2007":26171,"2008":30563,"2009":29757,"2010":31237,"2011":50024,"2012":72582,"2013":50954,"2014":48115,"2015":52908,"2016":53968,"2017":44501,"2018":41597,"2019":37211,"2020":37169,"2021":33073,"2022":32507,"2023":31428,"2024":28015,"2025":29298}},"reg":{"2004":{"Andaluc\u00eda":{"AVES":99682371,"BOVINO":116729,"CAPRINO":208984,"CONEJOS":526127,"EQUINO":166,"OVINO":394130,"PORCINO":3307887},"Arag\u00f3n":{"AVES":14439804,"BOVINO":166710,"CAPRINO":91741,"CONEJOS":4931981,"EQUINO":89,"OVINO":1812161,"PORCINO":2979466},"Asturias":{"AVES":0,"BOVINO":91252,"CAPRINO":4465,"CONEJOS":358816,"EQUINO":2778,"OVINO":64885,"PORCINO":253241},"Canarias":{"AVES":5792308,"BOVINO":8447,"CAPRINO":300102,"CONEJOS":179422,"EQUINO":0,"OVINO":5838,"PORCINO":91305},"Cantabria":{"AVES":0,"BOVINO":56841,"CAPRINO":1173,"CONEJOS":86923,"EQUINO":1979,"OVINO":3923,"PORCINO":1733},"Castilla y Le\u00f3n":{"AVES":48745547,"BOVINO":469574,"CAPRINO":111287,"CONEJOS":3913848,"EQUINO":3009,"OVINO":4388448,"PORCINO":5418736},"Castilla-La Mancha":{"AVES":20360581,"BOVINO":202262,"CAPRINO":82160,"CONEJOS":4890417,"EQUINO":67,"OVINO":1480763,"PORCINO":3024275},"Catalunya":{"AVES":225877121,"BOVINO":557696,"CAPRINO":240252,"CONEJOS":13486000,"EQUINO":6664,"OVINO":1931847,"PORCINO":14278367},"Comunitat Valenciana":{"AVES":94830625,"BOVINO":64523,"CAPRINO":60705,"CONEJOS":7898643,"EQUINO":8522,"OVINO":1076809,"PORCINO":1753900},"Extremadura":{"AVES":10623627,"BOVINO":82399,"CAPRINO":41302,"CONEJOS":162177,"EQUINO":6,"OVINO":406577,"PORCINO":610439},"Galicia":{"AVES":76087682,"BOVINO":429491,"CAPRINO":18509,"CONEJOS":5220298,"EQUINO":1073,"OVINO":78601,"PORCINO":1259820},"Illes Balears":{"AVES":3886392,"BOVINO":14647,"CAPRINO":3641,"CONEJOS":18489,"EQUINO":86,"OVINO":171723,"PORCINO":183229},"La Rioja":{"AVES":2490355,"BOVINO":11059,"CAPRINO":32356,"CONEJOS":594550,"EQUINO":97,"OVINO":373254,"PORCINO":51913},"Madrid":{"AVES":25276928,"BOVINO":246746,"CAPRINO":37629,"CONEJOS":0,"EQUINO":0,"OVINO":514263,"PORCINO":891181},"Navarra":{"AVES":24296596,"BOVINO":41146,"CAPRINO":3691,"CONEJOS":2468099,"EQUINO":291,"OVINO":506526,"PORCINO":435641},"Pa\u00eds Vasco":{"AVES":9719360,"BOVINO":105800,"CAPRINO":742,"CONEJOS":865919,"EQUINO":654,"OVINO":220324,"PORCINO":112607},"Regi\u00f3n de Murcia":{"AVES":17290566,"BOVINO":66724,"CAPRINO":147067,"CONEJOS":448174,"EQUINO":0,"OVINO":1036541,"PORCINO":2410523}},"2005":{"Andaluc\u00eda":{"AVES":100162974,"BOVINO":136597,"CAPRINO":205079,"CONEJOS":491743,"EQUINO":744,"OVINO":457867,"PORCINO":3385555},"Arag\u00f3n":{"AVES":12444166,"BOVINO":159627,"CAPRINO":89975,"CONEJOS":4881254,"EQUINO":124,"OVINO":1579677,"PORCINO":2669478},"Asturias":{"AVES":0,"BOVINO":86964,"CAPRINO":3564,"CONEJOS":403269,"EQUINO":3828,"OVINO":34810,"PORCINO":252482},"Canarias":{"AVES":6188201,"BOVINO":8421,"CAPRINO":29283,"CONEJOS":196286,"EQUINO":0,"OVINO":5914,"PORCINO":86342},"Cantabria":{"AVES":0,"BOVINO":49829,"CAPRINO":1001,"CONEJOS":80486,"EQUINO":1847,"OVINO":4599,"PORCINO":2025},"Castilla y Le\u00f3n":{"AVES":48569016,"BOVINO":497291,"CAPRINO":97142,"CONEJOS":3737455,"EQUINO":4314,"OVINO":4259883,"PORCINO":5897090},"Castilla-La Mancha":{"AVES":21676989,"BOVINO":212052,"CAPRINO":88838,"CONEJOS":6083337,"EQUINO":45,"OVINO":1552291,"PORCINO":3368268},"Catalunya":{"AVES":224736000,"BOVINO":553954,"CAPRINO":207138,"CONEJOS":13735843,"EQUINO":7060,"OVINO":1838756,"PORCINO":15289048},"Comunitat Valenciana":{"AVES":99545592,"BOVINO":56953,"CAPRINO":62816,"CONEJOS":5642747,"EQUINO":7424,"OVINO":991632,"PORCINO":1273294},"Extremadura":{"AVES":13560955,"BOVINO":96015,"CAPRINO":50697,"CONEJOS":111393,"EQUINO":5,"OVINO":404104,"PORCINO":625062},"Galicia":{"AVES":77294811,"BOVINO":436072,"CAPRINO":23126,"CONEJOS":5404585,"EQUINO":1199,"OVINO":66939,"PORCINO":1225865},"Illes Balears":{"AVES":3592633,"BOVINO":16936,"CAPRINO":4361,"CONEJOS":15047,"EQUINO":180,"OVINO":213527,"PORCINO":205162},"La Rioja":{"AVES":2455076,"BOVINO":13779,"CAPRINO":47166,"CONEJOS":589376,"EQUINO":93,"OVINO":368837,"PORCINO":48182},"Madrid":{"AVES":24909973,"BOVINO":214186,"CAPRINO":43621,"CONEJOS":0,"EQUINO":0,"OVINO":482670,"PORCINO":948919},"Navarra":{"AVES":24405530,"BOVINO":39127,"CAPRINO":3734,"CONEJOS":2267384,"EQUINO":370,"OVINO":496805,"PORCINO":513989},"Pa\u00eds Vasco":{"AVES":8973950,"BOVINO":105776,"CAPRINO":350,"CONEJOS":1024229,"EQUINO":377,"OVINO":162790,"PORCINO":43303},"Regi\u00f3n de Murcia":{"AVES":15846644,"BOVINO":73979,"CAPRINO":147388,"CONEJOS":448293,"EQUINO":0,"OVINO":1029144,"PORCINO":2487954}},"2006":{"Andaluc\u00eda":{"AVES":94412696,"BOVINO":122640,"CAPRINO":209750,"CONEJOS":484719,"EQUINO":253,"OVINO":667425,"PORCINO":3445158},"Arag\u00f3n":{"AVES":8765139,"BOVINO":154635,"CAPRINO":94910,"CONEJOS":5231779,"EQUINO":99,"OVINO":1572108,"PORCINO":2892821},"Asturias":{"AVES":44,"BOVINO":84294,"CAPRINO":3115,"CONEJOS":333485,"EQUINO":4695,"OVINO":34108,"PORCINO":248284},"Canarias":{"AVES":5831955,"BOVINO":7992,"CAPRINO":330651,"CONEJOS":225798,"EQUINO":0,"OVINO":6463,"PORCINO":86181},"Cantabria":{"AVES":0,"BOVINO":44201,"CAPRINO":807,"CONEJOS":94812,"EQUINO":1855,"OVINO":4086,"PORCINO":1985},"Castilla y Le\u00f3n":{"AVES":45054432,"BOVINO":454858,"CAPRINO":83937,"CONEJOS":4339597,"EQUINO":3131,"OVINO":4543124,"PORCINO":6089365},"Castilla-La Mancha":{"AVES":21332426,"BOVINO":217586,"CAPRINO":98998,"CONEJOS":5988510,"EQUINO":43,"OVINO":1929856,"PORCINO":3448475},"Catalunya":{"AVES":215592000,"BOVINO":522543,"CAPRINO":201862,"CONEJOS":13302659,"EQUINO":7168,"OVINO":1850738,"PORCINO":15311693},"Comunitat Valenciana":{"AVES":101273930,"BOVINO":51841,"CAPRINO":38147,"CONEJOS":5615728,"EQUINO":8035,"OVINO":1081993,"PORCINO":1293146},"Extremadura":{"AVES":14298316,"BOVINO":84995,"CAPRINO":42148,"CONEJOS":72500,"EQUINO":6,"OVINO":416766,"PORCINO":659893},"Galicia":{"AVES":77986701,"BOVINO":429320,"CAPRINO":20806,"CONEJOS":5831628,"EQUINO":1517,"OVINO":65887,"PORCINO":1184938},"Illes Balears":{"AVES":3282039,"BOVINO":15122,"CAPRINO":5991,"CONEJOS":8795,"EQUINO":84,"OVINO":217738,"PORCINO":186669},"La Rioja":{"AVES":2397961,"BOVINO":16338,"CAPRINO":75563,"CONEJOS":578478,"EQUINO":111,"OVINO":409018,"PORCINO":44835},"Madrid":{"AVES":23427702,"BOVINO":196344,"CAPRINO":27891,"CONEJOS":0,"EQUINO":0,"OVINO":412001,"PORCINO":1002855},"Navarra":{"AVES":21610982,"BOVINO":36082,"CAPRINO":3876,"CONEJOS":1925356,"EQUINO":387,"OVINO":519901,"PORCINO":512418},"Pa\u00eds Vasco":{"AVES":8400360,"BOVINO":87862,"CAPRINO":565,"CONEJOS":1119973,"EQUINO":372,"OVINO":131257,"PORCINO":47472},"Regi\u00f3n de Murcia":{"AVES":15019602,"BOVINO":72442,"CAPRINO":173829,"CONEJOS":470952,"EQUINO":0,"OVINO":1065314,"PORCINO":2354561}},"2007":{"Andaluc\u00eda":{"AVES":90831324,"BOVINO":111594,"CAPRINO":233207,"CONEJOS":464103,"EQUINO":181,"OVINO":585418,"PORCINO":3211866},"Arag\u00f3n":{"AVES":11861989,"BOVINO":134788,"CAPRINO":99925,"CONEJOS":5229119,"EQUINO":178,"OVINO":1687780,"PORCINO":2903952},"Asturias":{"AVES":6,"BOVINO":79530,"CAPRINO":2320,"CONEJOS":286161,"EQUINO":4674,"OVINO":36739,"PORCINO":294646},"Canarias":{"AVES":6320771,"BOVINO":7494,"CAPRINO":313573,"CONEJOS":224604,"EQUINO":0,"OVINO":6939,"PORCINO":86058},"Cantabria":{"AVES":0,"BOVINO":40021,"CAPRINO":237,"CONEJOS":88140,"EQUINO":1616,"OVINO":3147,"PORCINO":2255},"Castilla y Le\u00f3n":{"AVES":48631865,"BOVINO":400946,"CAPRINO":81760,"CONEJOS":4483655,"EQUINO":2512,"OVINO":4472658,"PORCINO":6854628},"Castilla-La Mancha":{"AVES":24298119,"BOVINO":187767,"CAPRINO":88244,"CONEJOS":6497950,"EQUINO":35,"OVINO":1970545,"PORCINO":3605685},"Catalunya":{"AVES":243764860,"BOVINO":516602,"CAPRINO":130440,"CONEJOS":13944000,"EQUINO":7173,"OVINO":1726046,"PORCINO":16353138},"Comunitat Valenciana":{"AVES":104028203,"BOVINO":82195,"CAPRINO":48776,"CONEJOS":5057459,"EQUINO":7726,"OVINO":1025705,"PORCINO":1494551},"Extremadura":{"AVES":16472693,"BOVINO":86367,"CAPRINO":37061,"CONEJOS":0,"EQUINO":0,"OVINO":472270,"PORCINO":801342},"Galicia":{"AVES":80925838,"BOVINO":407054,"CAPRINO":16351,"CONEJOS":6608177,"EQUINO":1172,"OVINO":59401,"PORCINO":1201708},"Illes Balears":{"AVES":3373687,"BOVINO":14789,"CAPRINO":5007,"CONEJOS":7770,"EQUINO":83,"OVINO":214643,"PORCINO":201308},"La Rioja":{"AVES":2912792,"BOVINO":15685,"CAPRINO":54686,"CONEJOS":514232,"EQUINO":54,"OVINO":414707,"PORCINO":47359},"Madrid":{"AVES":25307681,"BOVINO":177591,"CAPRINO":38979,"CONEJOS":0,"EQUINO":0,"OVINO":359980,"PORCINO":1086697},"Navarra":{"AVES":28861799,"BOVINO":29496,"CAPRINO":2516,"CONEJOS":2069987,"EQUINO":398,"OVINO":516007,"PORCINO":577860},"Pa\u00eds Vasco":{"AVES":9596920,"BOVINO":73086,"CAPRINO":402,"CONEJOS":1156423,"EQUINO":369,"OVINO":120069,"PORCINO":46906},"Regi\u00f3n de Murcia":{"AVES":15118199,"BOVINO":62978,"CAPRINO":152536,"CONEJOS":489315,"EQUINO":0,"OVINO":906875,"PORCINO":2718586}},"2008":{"Andaluc\u00eda":{"AVES":106598583,"BOVINO":124494,"CAPRINO":156700,"CONEJOS":407016,"EQUINO":246,"OVINO":421277,"PORCINO":3249920},"Arag\u00f3n":{"AVES":5669577,"BOVINO":122124,"CAPRINO":97064,"CONEJOS":4821302,"EQUINO":1349,"OVINO":1437362,"PORCINO":3017911},"Asturias":{"AVES":6,"BOVINO":92661,"CAPRINO":2097,"CONEJOS":53676,"EQUINO":4754,"OVINO":33434,"PORCINO":277856},"Canarias":{"AVES":6491126,"BOVINO":7627,"CAPRINO":302175,"CONEJOS":227961,"EQUINO":0,"OVINO":8360,"PORCINO":89626},"Cantabria":{"AVES":0,"BOVINO":45185,"CAPRINO":464,"CONEJOS":98560,"EQUINO":1653,"OVINO":1537,"PORCINO":1738},"Castilla y Le\u00f3n":{"AVES":50556943,"BOVINO":425542,"CAPRINO":70088,"CONEJOS":3135872,"EQUINO":2419,"OVINO":3773976,"PORCINO":6007904},"Castilla-La Mancha":{"AVES":24588893,"BOVINO":190765,"CAPRINO":78020,"CONEJOS":3367290,"EQUINO":0,"OVINO":1632228,"PORCINO":3533736},"Catalunya":{"AVES":210835951,"BOVINO":492678,"CAPRINO":125553,"CONEJOS":13329000,"EQUINO":6697,"OVINO":1505647,"PORCINO":16729435},"Comunitat Valenciana":{"AVES":99739841,"BOVINO":128417,"CAPRINO":29390,"CONEJOS":5723065,"EQUINO":7795,"OVINO":922963,"PORCINO":1491192},"Extremadura":{"AVES":21655087,"BOVINO":107857,"CAPRINO":33765,"CONEJOS":0,"EQUINO":6,"OVINO":408611,"PORCINO":883864},"Galicia":{"AVES":82698357,"BOVINO":404554,"CAPRINO":17283,"CONEJOS":7042841,"EQUINO":1210,"OVINO":50579,"PORCINO":1202290},"Illes Balears":{"AVES":3028361,"BOVINO":15019,"CAPRINO":5164,"CONEJOS":5259,"EQUINO":74,"OVINO":207084,"PORCINO":182237},"La Rioja":{"AVES":2960070,"BOVINO":14776,"CAPRINO":45351,"CONEJOS":572405,"EQUINO":97,"OVINO":398731,"PORCINO":47976},"Madrid":{"AVES":25263859,"BOVINO":180943,"CAPRINO":33670,"CONEJOS":0,"EQUINO":0,"OVINO":270933,"PORCINO":1101289},"Navarra":{"AVES":29300203,"BOVINO":30553,"CAPRINO":3062,"CONEJOS":2044166,"EQUINO":3848,"OVINO":493547,"PORCINO":602406},"Pa\u00eds Vasco":{"AVES":10855960,"BOVINO":68889,"CAPRINO":591,"CONEJOS":1232637,"EQUINO":415,"OVINO":119084,"PORCINO":41404},"Regi\u00f3n de Murcia":{"AVES":14647801,"BOVINO":54650,"CAPRINO":154071,"CONEJOS":440170,"EQUINO":0,"OVINO":870551,"PORCINO":2934808}},"2009":{"Andaluc\u00eda":{"AVES":94052000,"BOVINO":115167,"CAPRINO":163432,"CONEJOS":200656,"EQUINO":369,"OVINO":425387,"PORCINO":3161254},"Arag\u00f3n":{"AVES":5665355,"BOVINO":101033,"CAPRINO":49847,"CONEJOS":4560464,"EQUINO":1402,"OVINO":1104343,"PORCINO":3176267},"Asturias":{"AVES":6,"BOVINO":93985,"CAPRINO":2196,"CONEJOS":0,"EQUINO":5073,"OVINO":17638,"PORCINO":280749},"Canarias":{"AVES":6067291,"BOVINO":7725,"CAPRINO":310412,"CONEJOS":227588,"EQUINO":0,"OVINO":7549,"PORCINO":81071},"Cantabria":{"AVES":0,"BOVINO":40002,"CAPRINO":493,"CONEJOS":105580,"EQUINO":1807,"OVINO":1442,"PORCINO":1631},"Castilla y Le\u00f3n":{"AVES":51373950,"BOVINO":418780,"CAPRINO":75424,"CONEJOS":4939482,"EQUINO":2295,"OVINO":3440344,"PORCINO":5202458},"Castilla-La Mancha":{"AVES":14872124,"BOVINO":166487,"CAPRINO":81611,"CONEJOS":3004714,"EQUINO":12,"OVINO":1689223,"PORCINO":3441833},"Catalunya":{"AVES":208593277,"BOVINO":473824,"CAPRINO":174616,"CONEJOS":13662738,"EQUINO":6374,"OVINO":1476210,"PORCINO":16717935},"Comunitat Valenciana":{"AVES":99120436,"BOVINO":108635,"CAPRINO":32422,"CONEJOS":4542527,"EQUINO":7130,"OVINO":803658,"PORCINO":1419332},"Extremadura":{"AVES":22503899,"BOVINO":91707,"CAPRINO":33535,"CONEJOS":0,"EQUINO":7,"OVINO":336634,"PORCINO":691078},"Galicia":{"AVES":81095898,"BOVINO":389733,"CAPRINO":15473,"CONEJOS":7005623,"EQUINO":742,"OVINO":47834,"PORCINO":1115859},"Illes Balears":{"AVES":2756504,"BOVINO":12432,"CAPRINO":3716,"CONEJOS":2052,"EQUINO":69,"OVINO":185763,"PORCINO":161751},"La Rioja":{"AVES":3037372,"BOVINO":12810,"CAPRINO":34993,"CONEJOS":608901,"EQUINO":84,"OVINO":378888,"PORCINO":40153},"Madrid":{"AVES":26555383,"BOVINO":129995,"CAPRINO":32616,"CONEJOS":0,"EQUINO":0,"OVINO":248530,"PORCINO":1119552},"Navarra":{"AVES":36273093,"BOVINO":26354,"CAPRINO":3821,"CONEJOS":1881557,"EQUINO":3927,"OVINO":418090,"PORCINO":562955},"Pa\u00eds Vasco":{"AVES":10078532,"BOVINO":73172,"CAPRINO":490,"CONEJOS":1157395,"EQUINO":466,"OVINO":102054,"PORCINO":44376},"Regi\u00f3n de Murcia":{"AVES":13401145,"BOVINO":44754,"CAPRINO":157670,"CONEJOS":522207,"EQUINO":0,"OVINO":708677,"PORCINO":2899648}},"2010":{"Andaluc\u00eda":{"AVES":104749268,"BOVINO":101761,"CAPRINO":371230,"CONEJOS":144889,"EQUINO":483,"OVINO":548072,"PORCINO":3258975},"Arag\u00f3n":{"AVES":5094617,"BOVINO":101361,"CAPRINO":25100,"CONEJOS":4912968,"EQUINO":1337,"OVINO":1088346,"PORCINO":3199729},"Asturias":{"AVES":0,"BOVINO":87002,"CAPRINO":1624,"CONEJOS":0,"EQUINO":3669,"OVINO":12695,"PORCINO":254248},"Canarias":{"AVES":5807340,"BOVINO":7539,"CAPRINO":289813,"CONEJOS":212799,"EQUINO":0,"OVINO":7520,"PORCINO":87813},"Cantabria":{"AVES":0,"BOVINO":39252,"CAPRINO":1211,"CONEJOS":94700,"EQUINO":1789,"OVINO":2302,"PORCINO":1562},"Castilla y Le\u00f3n":{"AVES":52610042,"BOVINO":449490,"CAPRINO":75799,"CONEJOS":5756224,"EQUINO":2408,"OVINO":3731028,"PORCINO":5913791},"Castilla-La Mancha":{"AVES":17347022,"BOVINO":170434,"CAPRINO":120144,"CONEJOS":3667223,"EQUINO":0,"OVINO":1716798,"PORCINO":3459632},"Catalunya":{"AVES":206072497,"BOVINO":480685,"CAPRINO":177512,"CONEJOS":14146958,"EQUINO":6864,"OVINO":1508456,"PORCINO":16898418},"Comunitat Valenciana":{"AVES":100293071,"BOVINO":96003,"CAPRINO":28629,"CONEJOS":3922958,"EQUINO":7040,"OVINO":739160,"PORCINO":1448614},"Extremadura":{"AVES":27407900,"BOVINO":85478,"CAPRINO":40725,"CONEJOS":0,"EQUINO":0,"OVINO":317171,"PORCINO":576815},"Galicia":{"AVES":82169375,"BOVINO":384291,"CAPRINO":11571,"CONEJOS":7842716,"EQUINO":1111,"OVINO":42070,"PORCINO":982817},"Illes Balears":{"AVES":2873434,"BOVINO":12195,"CAPRINO":3795,"CONEJOS":2243,"EQUINO":72,"OVINO":181516,"PORCINO":157577},"La Rioja":{"AVES":3039594,"BOVINO":17329,"CAPRINO":16294,"CONEJOS":530247,"EQUINO":104,"OVINO":365594,"PORCINO":40914},"Madrid":{"AVES":26371570,"BOVINO":122638,"CAPRINO":38559,"CONEJOS":0,"EQUINO":0,"OVINO":225970,"PORCINO":993098},"Navarra":{"AVES":38528909,"BOVINO":27847,"CAPRINO":5750,"CONEJOS":1951830,"EQUINO":5855,"OVINO":410141,"PORCINO":492287},"Pa\u00eds Vasco":{"AVES":10025198,"BOVINO":61964,"CAPRINO":442,"CONEJOS":1234346,"EQUINO":505,"OVINO":74217,"PORCINO":19934},"Regi\u00f3n de Murcia":{"AVES":12675942,"BOVINO":56820,"CAPRINO":167666,"CONEJOS":435269,"EQUINO":0,"OVINO":764941,"PORCINO":3060792}},"2011":{"Andaluc\u00eda":{"AVES":103221913,"BOVINO":101722,"CAPRINO":386226,"CONEJOS":141980,"EQUINO":5492,"OVINO":489038,"PORCINO":3516352},"Arag\u00f3n":{"AVES":4476635,"BOVINO":106340,"CAPRINO":25406,"CONEJOS":4737128,"EQUINO":2008,"OVINO":1151725,"PORCINO":3192664},"Asturias":{"AVES":0,"BOVINO":85176,"CAPRINO":3204,"CONEJOS":0,"EQUINO":3578,"OVINO":12145,"PORCINO":238305},"Canarias":{"AVES":5609039,"BOVINO":8402,"CAPRINO":286450,"CONEJOS":200267,"EQUINO":0,"OVINO":8184,"PORCINO":87182},"Cantabria":{"AVES":0,"BOVINO":37519,"CAPRINO":1058,"CONEJOS":92452,"EQUINO":1920,"OVINO":2720,"PORCINO":1526},"Castilla y Le\u00f3n":{"AVES":54985011,"BOVINO":469843,"CAPRINO":115135,"CONEJOS":5570215,"EQUINO":7827,"OVINO":3740005,"PORCINO":6079137},"Castilla-La Mancha":{"AVES":17797960,"BOVINO":182898,"CAPRINO":128559,"CONEJOS":4118165,"EQUINO":520,"OVINO":1613981,"PORCINO":3551182},"Catalunya":{"AVES":212181607,"BOVINO":477388,"CAPRINO":179797,"CONEJOS":14082249,"EQUINO":8167,"OVINO":1432138,"PORCINO":17449951},"Comunitat Valenciana":{"AVES":101056808,"BOVINO":82749,"CAPRINO":28659,"CONEJOS":3431365,"EQUINO":8051,"OVINO":704379,"PORCINO":1482300},"Extremadura":{"AVES":26979300,"BOVINO":81178,"CAPRINO":34103,"CONEJOS":0,"EQUINO":6,"OVINO":300209,"PORCINO":608495},"Galicia":{"AVES":74774904,"BOVINO":395632,"CAPRINO":11233,"CONEJOS":8093623,"EQUINO":3757,"OVINO":41039,"PORCINO":903067},"Illes Balears":{"AVES":2715927,"BOVINO":12273,"CAPRINO":4007,"CONEJOS":1981,"EQUINO":76,"OVINO":187276,"PORCINO":148382},"La Rioja":{"AVES":3064098,"BOVINO":16042,"CAPRINO":14936,"CONEJOS":539173,"EQUINO":308,"OVINO":352569,"PORCINO":36326},"Madrid":{"AVES":28030186,"BOVINO":107385,"CAPRINO":35403,"CONEJOS":0,"EQUINO":5,"OVINO":162013,"PORCINO":935537},"Navarra":{"AVES":46663715,"BOVINO":33478,"CAPRINO":3124,"CONEJOS":2137935,"EQUINO":7656,"OVINO":401002,"PORCINO":481697},"Pa\u00eds Vasco":{"AVES":9983457,"BOVINO":56243,"CAPRINO":640,"CONEJOS":1261594,"EQUINO":485,"OVINO":61507,"PORCINO":10889},"Regi\u00f3n de Murcia":{"AVES":12186830,"BOVINO":60484,"CAPRINO":164656,"CONEJOS":476740,"EQUINO":168,"OVINO":717365,"PORCINO":3020371}},"2012":{"Andaluc\u00eda":{"AVES":100403295,"BOVINO":101119,"CAPRINO":344622,"CONEJOS":132889,"EQUINO":18155,"OVINO":434656,"PORCINO":3625966},"Arag\u00f3n":{"AVES":4230864,"BOVINO":105516,"CAPRINO":21085,"CONEJOS":4819679,"EQUINO":3600,"OVINO":1018342,"PORCINO":3131887},"Asturias":{"AVES":0,"BOVINO":83351,"CAPRINO":2132,"CONEJOS":0,"EQUINO":3965,"OVINO":12204,"PORCINO":197953},"Canarias":{"AVES":5656077,"BOVINO":9098,"CAPRINO":273272,"CONEJOS":149590,"EQUINO":0,"OVINO":8568,"PORCINO":81502},"Cantabria":{"AVES":0,"BOVINO":38993,"CAPRINO":834,"CONEJOS":94240,"EQUINO":2891,"OVINO":1935,"PORCINO":1464},"Castilla y Le\u00f3n":{"AVES":58217554,"BOVINO":473250,"CAPRINO":120268,"CONEJOS":5891284,"EQUINO":10139,"OVINO":3485341,"PORCINO":5698680},"Castilla-La Mancha":{"AVES":17792072,"BOVINO":170510,"CAPRINO":101553,"CONEJOS":5014778,"EQUINO":3283,"OVINO":1480516,"PORCINO":3682671},"Catalunya":{"AVES":206482095,"BOVINO":477549,"CAPRINO":174412,"CONEJOS":13987225,"EQUINO":7280,"OVINO":1341826,"PORCINO":18042794},"Comunitat Valenciana":{"AVES":100070019,"BOVINO":93041,"CAPRINO":20783,"CONEJOS":2192406,"EQUINO":8911,"OVINO":647887,"PORCINO":1344358},"Extremadura":{"AVES":29940371,"BOVINO":74372,"CAPRINO":22504,"CONEJOS":0,"EQUINO":0,"OVINO":276622,"PORCINO":524838},"Galicia":{"AVES":80111341,"BOVINO":402175,"CAPRINO":10392,"CONEJOS":8587999,"EQUINO":3259,"OVINO":39104,"PORCINO":854742},"Illes Balears":{"AVES":2561388,"BOVINO":11011,"CAPRINO":6120,"CONEJOS":1636,"EQUINO":103,"OVINO":165699,"PORCINO":135719},"La Rioja":{"AVES":2822509,"BOVINO":13433,"CAPRINO":14753,"CONEJOS":534826,"EQUINO":319,"OVINO":312411,"PORCINO":26763},"Madrid":{"AVES":23425480,"BOVINO":89088,"CAPRINO":34536,"CONEJOS":0,"EQUINO":0,"OVINO":134201,"PORCINO":732750},"Navarra":{"AVES":49739049,"BOVINO":30091,"CAPRINO":2895,"CONEJOS":2222205,"EQUINO":9125,"OVINO":369371,"PORCINO":468876},"Pa\u00eds Vasco":{"AVES":10907356,"BOVINO":49094,"CAPRINO":557,"CONEJOS":1404977,"EQUINO":462,"OVINO":51861,"PORCINO":9809},"Regi\u00f3n de Murcia":{"AVES":11505873,"BOVINO":64233,"CAPRINO":156369,"CONEJOS":484430,"EQUINO":1090,"OVINO":738124,"PORCINO":3033784}},"2013":{"Andaluc\u00eda":{"AVES":97218947,"BOVINO":91090,"CAPRINO":349897,"CONEJOS":86377,"EQUINO":3981,"OVINO":466273,"PORCINO":3421651},"Arag\u00f3n":{"AVES":3843349,"BOVINO":113577,"CAPRINO":20190,"CONEJOS":4591205,"EQUINO":5338,"OVINO":994625,"PORCINO":3315095},"Asturias":{"AVES":0,"BOVINO":78562,"CAPRINO":2058,"CONEJOS":0,"EQUINO":3946,"OVINO":10892,"PORCINO":206683},"Canarias":{"AVES":5294947,"BOVINO":8432,"CAPRINO":272143,"CONEJOS":131499,"EQUINO":0,"OVINO":8687,"PORCINO":75854},"Cantabria":{"AVES":0,"BOVINO":34848,"CAPRINO":675,"CONEJOS":97370,"EQUINO":3028,"OVINO":1404,"PORCINO":1389},"Castilla y Le\u00f3n":{"AVES":59317121,"BOVINO":419173,"CAPRINO":101171,"CONEJOS":6115809,"EQUINO":8171,"OVINO":3369978,"PORCINO":5311462},"Castilla-La Mancha":{"AVES":18019534,"BOVINO":160143,"CAPRINO":84317,"CONEJOS":4565837,"EQUINO":755,"OVINO":1519642,"PORCINO":3712064},"Catalunya":{"AVES":194853435,"BOVINO":483238,"CAPRINO":142997,"CONEJOS":13591583,"EQUINO":6501,"OVINO":1239117,"PORCINO":18593752},"Comunitat Valenciana":{"AVES":99060855,"BOVINO":129926,"CAPRINO":18864,"CONEJOS":2323936,"EQUINO":7726,"OVINO":674002,"PORCINO":1174114},"Extremadura":{"AVES":32379903,"BOVINO":80298,"CAPRINO":23644,"CONEJOS":0,"EQUINO":0,"OVINO":276253,"PORCINO":429295},"Galicia":{"AVES":77448176,"BOVINO":378954,"CAPRINO":9240,"CONEJOS":8709271,"EQUINO":1675,"OVINO":33030,"PORCINO":865672},"Illes Balears":{"AVES":2359130,"BOVINO":10423,"CAPRINO":13113,"CONEJOS":2680,"EQUINO":134,"OVINO":170031,"PORCINO":131984},"La Rioja":{"AVES":2770545,"BOVINO":13712,"CAPRINO":16642,"CONEJOS":523807,"EQUINO":138,"OVINO":308416,"PORCINO":24008},"Madrid":{"AVES":21264233,"BOVINO":82032,"CAPRINO":28669,"CONEJOS":0,"EQUINO":0,"OVINO":148630,"PORCINO":623489},"Navarra":{"AVES":51091993,"BOVINO":25860,"CAPRINO":3480,"CONEJOS":2192846,"EQUINO":8622,"OVINO":400634,"PORCINO":441441},"Pa\u00eds Vasco":{"AVES":10118895,"BOVINO":49458,"CAPRINO":684,"CONEJOS":1323413,"EQUINO":601,"OVINO":51952,"PORCINO":8596},"Regi\u00f3n de Murcia":{"AVES":10497474,"BOVINO":62277,"CAPRINO":125967,"CONEJOS":460900,"EQUINO":338,"OVINO":638471,"PORCINO":3081917}},"2014":{"Andaluc\u00eda":{"AVES":118692833,"BOVINO":85000,"CAPRINO":351723,"CONEJOS":76580,"EQUINO":3400,"OVINO":466378,"PORCINO":3330886},"Arag\u00f3n":{"AVES":3523378,"BOVINO":107611,"CAPRINO":17033,"CONEJOS":4273727,"EQUINO":6755,"OVINO":968577,"PORCINO":3686631},"Asturias":{"AVES":0,"BOVINO":65460,"CAPRINO":1705,"CONEJOS":0,"EQUINO":3530,"OVINO":10561,"PORCINO":153844},"Canarias":{"AVES":5716443,"BOVINO":7761,"CAPRINO":228384,"CONEJOS":126912,"EQUINO":0,"OVINO":8073,"PORCINO":77018},"Cantabria":{"AVES":0,"BOVINO":32610,"CAPRINO":633,"CONEJOS":99510,"EQUINO":4642,"OVINO":554,"PORCINO":1010},"Castilla y Le\u00f3n":{"AVES":60760305,"BOVINO":403612,"CAPRINO":83394,"CONEJOS":6054937,"EQUINO":6118,"OVINO":3208837,"PORCINO":5980360},"Castilla-La Mancha":{"AVES":18700107,"BOVINO":150372,"CAPRINO":90832,"CONEJOS":4918018,"EQUINO":0,"OVINO":1354595,"PORCINO":3564190},"Catalunya":{"AVES":200582203,"BOVINO":471041,"CAPRINO":130057,"CONEJOS":13075838,"EQUINO":5842,"OVINO":1224133,"PORCINO":19362768},"Comunitat Valenciana":{"AVES":97063925,"BOVINO":153436,"CAPRINO":27419,"CONEJOS":2300478,"EQUINO":7586,"OVINO":660193,"PORCINO":1266324},"Extremadura":{"AVES":34580089,"BOVINO":88943,"CAPRINO":22505,"CONEJOS":0,"EQUINO":0,"OVINO":275619,"PORCINO":489281},"Galicia":{"AVES":81129211,"BOVINO":369820,"CAPRINO":7306,"CONEJOS":9020494,"EQUINO":534,"OVINO":35415,"PORCINO":922417},"Illes Balears":{"AVES":1745102,"BOVINO":9688,"CAPRINO":3093,"CONEJOS":2857,"EQUINO":71,"OVINO":165848,"PORCINO":139110},"La Rioja":{"AVES":2873384,"BOVINO":13397,"CAPRINO":23403,"CONEJOS":557417,"EQUINO":103,"OVINO":302908,"PORCINO":22216},"Madrid":{"AVES":22340499,"BOVINO":88396,"CAPRINO":26136,"CONEJOS":0,"EQUINO":0,"OVINO":153859,"PORCINO":751329},"Navarra":{"AVES":52279527,"BOVINO":22054,"CAPRINO":4626,"CONEJOS":2294787,"EQUINO":8735,"OVINO":377171,"PORCINO":430720},"Pa\u00eds Vasco":{"AVES":9922836,"BOVINO":49592,"CAPRINO":872,"CONEJOS":1328447,"EQUINO":503,"OVINO":54032,"PORCINO":8675},"Regi\u00f3n de Murcia":{"AVES":10184015,"BOVINO":63797,"CAPRINO":111094,"CONEJOS":464204,"EQUINO":296,"OVINO":661438,"PORCINO":3296794}},"2015":{"Andaluc\u00eda":{"AVES":116812703,"BOVINO":91486,"CAPRINO":362542,"CONEJOS":77213,"EQUINO":3134,"OVINO":516719,"PORCINO":3379869},"Arag\u00f3n":{"AVES":3689753,"BOVINO":113331,"CAPRINO":19502,"CONEJOS":4331829,"EQUINO":8710,"OVINO":936920,"PORCINO":4796951},"Asturias":{"AVES":0,"BOVINO":59708,"CAPRINO":1560,"CONEJOS":0,"EQUINO":3621,"OVINO":10764,"PORCINO":87717},"Canarias":{"AVES":6294371,"BOVINO":7586,"CAPRINO":209397,"CONEJOS":130364,"EQUINO":0,"OVINO":8845,"PORCINO":75632},"Cantabria":{"AVES":0,"BOVINO":35380,"CAPRINO":558,"CONEJOS":98140,"EQUINO":6600,"OVINO":619,"PORCINO":925},"Castilla y Le\u00f3n":{"AVES":62988232,"BOVINO":433185,"CAPRINO":91039,"CONEJOS":6152494,"EQUINO":5477,"OVINO":3198639,"PORCINO":6384116},"Castilla-La Mancha":{"AVES":21549628,"BOVINO":164960,"CAPRINO":85914,"CONEJOS":4526141,"EQUINO":0,"OVINO":1227735,"PORCINO":3692142},"Catalunya":{"AVES":206814489,"BOVINO":499169,"CAPRINO":139608,"CONEJOS":12166033,"EQUINO":6034,"OVINO":1232293,"PORCINO":19854375},"Comunitat Valenciana":{"AVES":97186978,"BOVINO":172303,"CAPRINO":34846,"CONEJOS":2249740,"EQUINO":6368,"OVINO":693813,"PORCINO":1303084},"Extremadura":{"AVES":37261588,"BOVINO":105797,"CAPRINO":65673,"CONEJOS":0,"EQUINO":6,"OVINO":338465,"PORCINO":526700},"Galicia":{"AVES":85461296,"BOVINO":398778,"CAPRINO":7780,"CONEJOS":9656165,"EQUINO":417,"OVINO":35829,"PORCINO":920992},"Illes Balears":{"AVES":639556,"BOVINO":9422,"CAPRINO":3425,"CONEJOS":1929,"EQUINO":81,"OVINO":165776,"PORCINO":138317},"La Rioja":{"AVES":2859000,"BOVINO":11722,"CAPRINO":24210,"CONEJOS":575892,"EQUINO":90,"OVINO":316861,"PORCINO":22175},"Madrid":{"AVES":22793289,"BOVINO":97704,"CAPRINO":28397,"CONEJOS":0,"EQUINO":0,"OVINO":143458,"PORCINO":884286},"Navarra":{"AVES":52064843,"BOVINO":19918,"CAPRINO":4941,"CONEJOS":2330252,"EQUINO":11843,"OVINO":342930,"PORCINO":420059},"Pa\u00eds Vasco":{"AVES":9605011,"BOVINO":43651,"CAPRINO":1140,"CONEJOS":1447269,"EQUINO":473,"OVINO":49995,"PORCINO":9502},"Regi\u00f3n de Murcia":{"AVES":10434263,"BOVINO":69795,"CAPRINO":129737,"CONEJOS":470173,"EQUINO":54,"OVINO":740515,"PORCINO":3393682}},"2016":{"Andaluc\u00eda":{"AVES":123760071,"BOVINO":92434,"CAPRINO":428185,"CONEJOS":75175,"EQUINO":1174,"OVINO":519758,"PORCINO":3530798},"Arag\u00f3n":{"AVES":3795243,"BOVINO":111298,"CAPRINO":20027,"CONEJOS":3841896,"EQUINO":8292,"OVINO":885272,"PORCINO":5588999},"Asturias":{"AVES":0,"BOVINO":58899,"CAPRINO":1931,"CONEJOS":0,"EQUINO":4567,"OVINO":null,"PORCINO":79729},"Canarias":{"AVES":6496236,"BOVINO":8324,"CAPRINO":212625,"CONEJOS":113666,"EQUINO":0,"OVINO":9678,"PORCINO":75540},"Cantabria":{"AVES":0,"BOVINO":36751,"CAPRINO":null,"CONEJOS":null,"EQUINO":5140,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":63740834,"BOVINO":427991,"CAPRINO":104307,"CONEJOS":6590459,"EQUINO":7755,"OVINO":3276894,"PORCINO":6427305},"Castilla-La Mancha":{"AVES":23878968,"BOVINO":163782,"CAPRINO":113695,"CONEJOS":3420906,"EQUINO":0,"OVINO":1302930,"PORCINO":3870058},"Catalunya":{"AVES":207325698,"BOVINO":525139,"CAPRINO":144353,"CONEJOS":11006071,"EQUINO":6663,"OVINO":1268911,"PORCINO":21684315},"Comunitat Valenciana":{"AVES":100884291,"BOVINO":186100,"CAPRINO":31292,"CONEJOS":2110184,"EQUINO":6650,"OVINO":688315,"PORCINO":1324840},"Extremadura":{"AVES":40355910,"BOVINO":110830,"CAPRINO":36274,"CONEJOS":0,"EQUINO":3,"OVINO":290117,"PORCINO":623320},"Galicia":{"AVES":87239226,"BOVINO":400280,"CAPRINO":8433,"CONEJOS":9444820,"EQUINO":285,"OVINO":41930,"PORCINO":945381},"Illes Balears":{"AVES":149925,"BOVINO":8979,"CAPRINO":5316,"CONEJOS":null,"EQUINO":null,"OVINO":172376,"PORCINO":141642},"La Rioja":{"AVES":null,"BOVINO":11364,"CAPRINO":20461,"CONEJOS":null,"EQUINO":40,"OVINO":312476,"PORCINO":20332},"Madrid":{"AVES":23417658,"BOVINO":100154,"CAPRINO":27791,"CONEJOS":0,"EQUINO":0,"OVINO":121022,"PORCINO":928945},"Navarra":{"AVES":60274710,"BOVINO":18423,"CAPRINO":4434,"CONEJOS":null,"EQUINO":12921,"OVINO":361465,"PORCINO":286782},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":42794,"CAPRINO":null,"CONEJOS":null,"EQUINO":367,"OVINO":56898,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":10345567,"BOVINO":70308,"CAPRINO":145101,"CONEJOS":476505,"EQUINO":null,"OVINO":792034,"PORCINO":3544786}},"2017":{"Andaluc\u00eda":{"AVES":120997982,"BOVINO":88630,"CAPRINO":462748,"CONEJOS":69156,"EQUINO":711,"OVINO":569843,"PORCINO":3456254},"Arag\u00f3n":{"AVES":3888598,"BOVINO":116127,"CAPRINO":24825,"CONEJOS":3034643,"EQUINO":6602,"OVINO":848074,"PORCINO":6541834},"Asturias":{"AVES":0,"BOVINO":54848,"CAPRINO":2400,"CONEJOS":0,"EQUINO":3583,"OVINO":null,"PORCINO":45257},"Canarias":{"AVES":6720225,"BOVINO":9756,"CAPRINO":190540,"CONEJOS":115975,"EQUINO":0,"OVINO":9409,"PORCINO":76059},"Cantabria":{"AVES":0,"BOVINO":41054,"CAPRINO":null,"CONEJOS":null,"EQUINO":2786,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":60841017,"BOVINO":415701,"CAPRINO":123213,"CONEJOS":7243908,"EQUINO":4423,"OVINO":3115784,"PORCINO":6461221},"Castilla-La Mancha":{"AVES":24764684,"BOVINO":170993,"CAPRINO":130416,"CONEJOS":3017336,"EQUINO":null,"OVINO":1307066,"PORCINO":3839469},"Catalunya":{"AVES":199516690,"BOVINO":514182,"CAPRINO":136281,"CONEJOS":10118135,"EQUINO":5131,"OVINO":1242514,"PORCINO":21646356},"Comunitat Valenciana":{"AVES":96087962,"BOVINO":209969,"CAPRINO":25165,"CONEJOS":2257539,"EQUINO":6330,"OVINO":662492,"PORCINO":1317275},"Extremadura":{"AVES":39175014,"BOVINO":124020,"CAPRINO":25663,"CONEJOS":0,"EQUINO":null,"OVINO":252040,"PORCINO":645607},"Galicia":{"AVES":89988136,"BOVINO":395723,"CAPRINO":9012,"CONEJOS":8969099,"EQUINO":177,"OVINO":38246,"PORCINO":988914},"Illes Balears":{"AVES":151206,"BOVINO":9346,"CAPRINO":5142,"CONEJOS":null,"EQUINO":null,"OVINO":161028,"PORCINO":134498},"La Rioja":{"AVES":null,"BOVINO":12203,"CAPRINO":20015,"CONEJOS":null,"EQUINO":433,"OVINO":328770,"PORCINO":22502},"Madrid":{"AVES":23638293,"BOVINO":97492,"CAPRINO":27351,"CONEJOS":0,"EQUINO":0,"OVINO":105199,"PORCINO":1012720},"Navarra":{"AVES":61580007,"BOVINO":18451,"CAPRINO":5729,"CONEJOS":null,"EQUINO":13994,"OVINO":322625,"PORCINO":54491},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":42696,"CAPRINO":null,"CONEJOS":null,"EQUINO":284,"OVINO":61884,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":13987838,"BOVINO":69812,"CAPRINO":166818,"CONEJOS":500996,"EQUINO":null,"OVINO":796508,"PORCINO":3818208}},"2018":{"Andaluc\u00eda":{"AVES":143583354,"BOVINO":93410,"CAPRINO":502182,"CONEJOS":57820,"EQUINO":704,"OVINO":531708,"PORCINO":3451426},"Arag\u00f3n":{"AVES":3823854,"BOVINO":123416,"CAPRINO":26286,"CONEJOS":2308058,"EQUINO":5843,"OVINO":969614,"PORCINO":7283519},"Asturias":{"AVES":0,"BOVINO":57287,"CAPRINO":3191,"CONEJOS":0,"EQUINO":2568,"OVINO":null,"PORCINO":49511},"Canarias":{"AVES":6956619,"BOVINO":10424,"CAPRINO":192639,"CONEJOS":111228,"EQUINO":0,"OVINO":11755,"PORCINO":71351},"Cantabria":{"AVES":0,"BOVINO":38341,"CAPRINO":null,"CONEJOS":null,"EQUINO":1266,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":60614242,"BOVINO":424233,"CAPRINO":118336,"CONEJOS":null,"EQUINO":7261,"OVINO":3157192,"PORCINO":7113806},"Castilla-La Mancha":{"AVES":27593756,"BOVINO":181243,"CAPRINO":106933,"CONEJOS":3205869,"EQUINO":null,"OVINO":1347792,"PORCINO":3984498},"Catalunya":{"AVES":214708458,"BOVINO":521091,"CAPRINO":128202,"CONEJOS":9891383,"EQUINO":4317,"OVINO":1315272,"PORCINO":22430128},"Comunitat Valenciana":{"AVES":89973470,"BOVINO":222776,"CAPRINO":48610,"CONEJOS":2443567,"EQUINO":5961,"OVINO":693209,"PORCINO":1340829},"Extremadura":{"AVES":39802447,"BOVINO":122368,"CAPRINO":22805,"CONEJOS":0,"EQUINO":null,"OVINO":271630,"PORCINO":651475},"Galicia":{"AVES":96779143,"BOVINO":392614,"CAPRINO":7191,"CONEJOS":null,"EQUINO":149,"OVINO":32876,"PORCINO":1015017},"Illes Balears":{"AVES":166943,"BOVINO":8394,"CAPRINO":4948,"CONEJOS":null,"EQUINO":null,"OVINO":157367,"PORCINO":125786},"La Rioja":{"AVES":null,"BOVINO":12685,"CAPRINO":22689,"CONEJOS":null,"EQUINO":663,"OVINO":315418,"PORCINO":26510},"Madrid":{"AVES":26391632,"BOVINO":111226,"CAPRINO":25473,"CONEJOS":0,"EQUINO":0,"OVINO":93354,"PORCINO":828169},"Navarra":{"AVES":60816908,"BOVINO":18121,"CAPRINO":5368,"CONEJOS":null,"EQUINO":12260,"OVINO":340441,"PORCINO":57908},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":44285,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":59588,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":null,"BOVINO":80643,"CAPRINO":153790,"CONEJOS":411145,"EQUINO":0,"OVINO":797979,"PORCINO":3845997}},"2019":{"Andaluc\u00eda":{"AVES":160140384,"BOVINO":94154,"CAPRINO":478330,"CONEJOS":33862,"EQUINO":414,"OVINO":576495,"PORCINO":3463528},"Arag\u00f3n":{"AVES":3616521,"BOVINO":125364,"CAPRINO":22771,"CONEJOS":null,"EQUINO":6474,"OVINO":966147,"PORCINO":8048077},"Asturias":{"AVES":0,"BOVINO":59188,"CAPRINO":3701,"CONEJOS":0,"EQUINO":2234,"OVINO":null,"PORCINO":48134},"Canarias":{"AVES":7175664,"BOVINO":9872,"CAPRINO":187582,"CONEJOS":102337,"EQUINO":0,"OVINO":12806,"PORCINO":70926},"Cantabria":{"AVES":0,"BOVINO":36936,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":66163082,"BOVINO":404083,"CAPRINO":113641,"CONEJOS":null,"EQUINO":5185,"OVINO":3342061,"PORCINO":6921212},"Castilla-La Mancha":{"AVES":null,"BOVINO":187592,"CAPRINO":99150,"CONEJOS":null,"EQUINO":null,"OVINO":1313524,"PORCINO":4291492},"Catalunya":{"AVES":194165898,"BOVINO":541737,"CAPRINO":114578,"CONEJOS":9157559,"EQUINO":2967,"OVINO":1158517,"PORCINO":22451793},"Comunitat Valenciana":{"AVES":100371268,"BOVINO":222339,"CAPRINO":65912,"CONEJOS":2615927,"EQUINO":5496,"OVINO":591568,"PORCINO":1310898},"Extremadura":{"AVES":null,"BOVINO":111992,"CAPRINO":16381,"CONEJOS":0,"EQUINO":null,"OVINO":265453,"PORCINO":629711},"Galicia":{"AVES":99611558,"BOVINO":419974,"CAPRINO":8265,"CONEJOS":null,"EQUINO":86,"OVINO":31512,"PORCINO":990913},"Illes Balears":{"AVES":142077,"BOVINO":7858,"CAPRINO":5145,"CONEJOS":null,"EQUINO":null,"OVINO":146298,"PORCINO":116748},"La Rioja":{"AVES":null,"BOVINO":12802,"CAPRINO":22086,"CONEJOS":null,"EQUINO":null,"OVINO":327089,"PORCINO":27769},"Madrid":{"AVES":26652698,"BOVINO":123008,"CAPRINO":19211,"CONEJOS":0,"EQUINO":0,"OVINO":96713,"PORCINO":649266},"Navarra":{"AVES":61043257,"BOVINO":23649,"CAPRINO":5163,"CONEJOS":null,"EQUINO":12697,"OVINO":319332,"PORCINO":48213},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":42433,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":61200,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":null,"BOVINO":87793,"CAPRINO":138887,"CONEJOS":null,"EQUINO":0,"OVINO":841343,"PORCINO":3901475}},"2020":{"Andaluc\u00eda":{"AVES":158250029,"BOVINO":96473,"CAPRINO":464763,"CONEJOS":29896,"EQUINO":350,"OVINO":522395,"PORCINO":3349489},"Arag\u00f3n":{"AVES":3212620,"BOVINO":123773,"CAPRINO":24675,"CONEJOS":null,"EQUINO":null,"OVINO":928868,"PORCINO":10106149},"Asturias":{"AVES":0,"BOVINO":61937,"CAPRINO":2427,"CONEJOS":0,"EQUINO":null,"OVINO":null,"PORCINO":45868},"Canarias":{"AVES":6927453,"BOVINO":10643,"CAPRINO":183496,"CONEJOS":95748,"EQUINO":0,"OVINO":10696,"PORCINO":65012},"Cantabria":{"AVES":0,"BOVINO":37122,"CAPRINO":null,"CONEJOS":null,"EQUINO":843,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":59751110,"BOVINO":394334,"CAPRINO":91817,"CONEJOS":7916875,"EQUINO":5983,"OVINO":3175207,"PORCINO":7047909},"Castilla-La Mancha":{"AVES":31045610,"BOVINO":185164,"CAPRINO":81706,"CONEJOS":3126067,"EQUINO":0,"OVINO":1225058,"PORCINO":4333700},"Catalunya":{"AVES":189836697,"BOVINO":473004,"CAPRINO":93427,"CONEJOS":8396168,"EQUINO":2120,"OVINO":1136757,"PORCINO":23193373},"Comunitat Valenciana":{"AVES":97464920,"BOVINO":260270,"CAPRINO":63686,"CONEJOS":2713775,"EQUINO":5225,"OVINO":574365,"PORCINO":1317470},"Extremadura":{"AVES":41294299,"BOVINO":107766,"CAPRINO":12907,"CONEJOS":0,"EQUINO":0,"OVINO":236523,"PORCINO":609108},"Galicia":{"AVES":98164135,"BOVINO":381127,"CAPRINO":7151,"CONEJOS":null,"EQUINO":109,"OVINO":26838,"PORCINO":1011327},"Illes Balears":{"AVES":113801,"BOVINO":7729,"CAPRINO":4609,"CONEJOS":1736,"EQUINO":null,"OVINO":137664,"PORCINO":93927},"La Rioja":{"AVES":null,"BOVINO":9922,"CAPRINO":18074,"CONEJOS":null,"EQUINO":null,"OVINO":283207,"PORCINO":22349},"Madrid":{"AVES":25444454,"BOVINO":117651,"CAPRINO":13633,"CONEJOS":0,"EQUINO":0,"OVINO":101223,"PORCINO":527546},"Navarra":{"AVES":56403838,"BOVINO":31262,"CAPRINO":4453,"CONEJOS":null,"EQUINO":13185,"OVINO":285760,"PORCINO":43561},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":43490,"CAPRINO":null,"CONEJOS":null,"EQUINO":236,"OVINO":80450,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":18806731,"BOVINO":80738,"CAPRINO":139897,"CONEJOS":null,"EQUINO":0,"OVINO":830927,"PORCINO":4351057}},"2021":{"Andaluc\u00eda":{"AVES":155133584,"BOVINO":97668,"CAPRINO":429370,"CONEJOS":23388,"EQUINO":706,"OVINO":544053,"PORCINO":3379220},"Arag\u00f3n":{"AVES":3225453,"BOVINO":138042,"CAPRINO":21418,"CONEJOS":null,"EQUINO":null,"OVINO":930806,"PORCINO":11296395},"Asturias":{"AVES":0,"BOVINO":62100,"CAPRINO":3043,"CONEJOS":0,"EQUINO":2024,"OVINO":null,"PORCINO":44934},"Canarias":{"AVES":6418539,"BOVINO":11116,"CAPRINO":182104,"CONEJOS":89604,"EQUINO":0,"OVINO":10551,"PORCINO":64817},"Cantabria":{"AVES":0,"BOVINO":39655,"CAPRINO":null,"CONEJOS":null,"EQUINO":639,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":59973985,"BOVINO":392414,"CAPRINO":95293,"CONEJOS":7744034,"EQUINO":3347,"OVINO":3406528,"PORCINO":6997224},"Castilla-La Mancha":{"AVES":30387222,"BOVINO":184310,"CAPRINO":94452,"CONEJOS":2955074,"EQUINO":0,"OVINO":1170562,"PORCINO":4379944},"Catalunya":{"AVES":198866242,"BOVINO":502229,"CAPRINO":78059,"CONEJOS":7618392,"EQUINO":1594,"OVINO":1100978,"PORCINO":24041540},"Comunitat Valenciana":{"AVES":83554732,"BOVINO":281997,"CAPRINO":49866,"CONEJOS":2578869,"EQUINO":5023,"OVINO":584371,"PORCINO":1341172},"Extremadura":{"AVES":39936706,"BOVINO":126951,"CAPRINO":9066,"CONEJOS":0,"EQUINO":0,"OVINO":258826,"PORCINO":568757},"Galicia":{"AVES":96317039,"BOVINO":398754,"CAPRINO":6482,"CONEJOS":null,"EQUINO":120,"OVINO":31356,"PORCINO":982780},"Illes Balears":{"AVES":122511,"BOVINO":8199,"CAPRINO":4124,"CONEJOS":null,"EQUINO":null,"OVINO":133896,"PORCINO":100688},"La Rioja":{"AVES":null,"BOVINO":8053,"CAPRINO":18580,"CONEJOS":null,"EQUINO":101,"OVINO":280150,"PORCINO":25812},"Madrid":{"AVES":23964311,"BOVINO":143366,"CAPRINO":12822,"CONEJOS":0,"EQUINO":0,"OVINO":121812,"PORCINO":563839},"Navarra":{"AVES":55194387,"BOVINO":42834,"CAPRINO":4914,"CONEJOS":null,"EQUINO":12453,"OVINO":232543,"PORCINO":50017},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":42674,"CAPRINO":null,"CONEJOS":null,"EQUINO":165,"OVINO":72690,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":20501128,"BOVINO":72006,"CAPRINO":163474,"CONEJOS":null,"EQUINO":0,"OVINO":821736,"PORCINO":4519872}},"2022":{"Andaluc\u00eda":{"AVES":150021836,"BOVINO":100862,"CAPRINO":516428,"CONEJOS":16671,"EQUINO":480,"OVINO":473889,"PORCINO":3161589},"Arag\u00f3n":{"AVES":2729961,"BOVINO":146199,"CAPRINO":24389,"CONEJOS":null,"EQUINO":null,"OVINO":905750,"PORCINO":10798099},"Asturias":{"AVES":0,"BOVINO":59678,"CAPRINO":2860,"CONEJOS":0,"EQUINO":1657,"OVINO":null,"PORCINO":45219},"Canarias":{"AVES":5721438,"BOVINO":13430,"CAPRINO":183000,"CONEJOS":83639,"EQUINO":0,"OVINO":11907,"PORCINO":62459},"Cantabria":{"AVES":0,"BOVINO":36643,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":65186240,"BOVINO":429855,"CAPRINO":107623,"CONEJOS":7113799,"EQUINO":2814,"OVINO":3365908,"PORCINO":6953683},"Castilla-La Mancha":{"AVES":27162743,"BOVINO":197974,"CAPRINO":96697,"CONEJOS":2406979,"EQUINO":0,"OVINO":1124862,"PORCINO":4190695},"Catalunya":{"AVES":197156198,"BOVINO":511771,"CAPRINO":76469,"CONEJOS":6267280,"EQUINO":1390,"OVINO":1068086,"PORCINO":23384848},"Comunitat Valenciana":{"AVES":88957104,"BOVINO":285878,"CAPRINO":40298,"CONEJOS":2322833,"EQUINO":4186,"OVINO":548870,"PORCINO":1373621},"Extremadura":{"AVES":42526485,"BOVINO":116868,"CAPRINO":8656,"CONEJOS":0,"EQUINO":0,"OVINO":230763,"PORCINO":534980},"Galicia":{"AVES":91136015,"BOVINO":386500,"CAPRINO":6648,"CONEJOS":null,"EQUINO":109,"OVINO":30312,"PORCINO":961864},"Illes Balears":{"AVES":124426,"BOVINO":8071,"CAPRINO":4512,"CONEJOS":null,"EQUINO":0,"OVINO":136728,"PORCINO":101163},"La Rioja":{"AVES":null,"BOVINO":7308,"CAPRINO":19136,"CONEJOS":null,"EQUINO":13,"OVINO":316158,"PORCINO":22369},"Madrid":{"AVES":24832396,"BOVINO":148898,"CAPRINO":13887,"CONEJOS":0,"EQUINO":0,"OVINO":128081,"PORCINO":415584},"Navarra":{"AVES":61518050,"BOVINO":55447,"CAPRINO":3872,"CONEJOS":null,"EQUINO":14260,"OVINO":207645,"PORCINO":53407},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":38878,"CAPRINO":null,"CONEJOS":null,"EQUINO":140,"OVINO":62035,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":22418937,"BOVINO":61159,"CAPRINO":166373,"CONEJOS":null,"EQUINO":0,"OVINO":744100,"PORCINO":4198279}},"2023":{"Andaluc\u00eda":{"AVES":151765360,"BOVINO":88248,"CAPRINO":484567,"CONEJOS":null,"EQUINO":null,"OVINO":496778,"PORCINO":3088770},"Arag\u00f3n":{"AVES":2525948,"BOVINO":131957,"CAPRINO":19843,"CONEJOS":null,"EQUINO":null,"OVINO":827576,"PORCINO":10792888},"Asturias":{"AVES":0,"BOVINO":54995,"CAPRINO":2768,"CONEJOS":0,"EQUINO":874,"OVINO":9143,"PORCINO":45034},"Canarias":{"AVES":5329308,"BOVINO":11744,"CAPRINO":183828,"CONEJOS":51629,"EQUINO":0,"OVINO":10490,"PORCINO":56418},"Cantabria":{"AVES":0,"BOVINO":null,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":69633174,"BOVINO":423553,"CAPRINO":91299,"CONEJOS":null,"EQUINO":3539,"OVINO":2974890,"PORCINO":6378898},"Castilla-La Mancha":{"AVES":28927593,"BOVINO":182585,"CAPRINO":88480,"CONEJOS":null,"EQUINO":0,"OVINO":1163112,"PORCINO":3899734},"Catalunya":{"AVES":196478141,"BOVINO":486361,"CAPRINO":70034,"CONEJOS":4980796,"EQUINO":1243,"OVINO":930527,"PORCINO":22058846},"Comunitat Valenciana":{"AVES":94858997,"BOVINO":278425,"CAPRINO":37329,"CONEJOS":null,"EQUINO":3957,"OVINO":473037,"PORCINO":1141563},"Extremadura":{"AVES":40891189,"BOVINO":105929,"CAPRINO":8851,"CONEJOS":0,"EQUINO":0,"OVINO":195173,"PORCINO":497192},"Galicia":{"AVES":95281460,"BOVINO":377348,"CAPRINO":4606,"CONEJOS":null,"EQUINO":82,"OVINO":24618,"PORCINO":917708},"Illes Balears":{"AVES":null,"BOVINO":7399,"CAPRINO":3723,"CONEJOS":null,"EQUINO":0,"OVINO":130928,"PORCINO":88377},"La Rioja":{"AVES":null,"BOVINO":null,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":null,"PORCINO":null},"Madrid":{"AVES":null,"BOVINO":123888,"CAPRINO":null,"CONEJOS":0,"EQUINO":0,"OVINO":null,"PORCINO":null},"Navarra":{"AVES":61484698,"BOVINO":56871,"CAPRINO":4902,"CONEJOS":null,"EQUINO":null,"OVINO":190720,"PORCINO":null},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":35993,"CAPRINO":2179,"CONEJOS":null,"EQUINO":166,"OVINO":65233,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":null,"BOVINO":50108,"CAPRINO":121873,"CONEJOS":null,"EQUINO":0,"OVINO":534950,"PORCINO":3721116}},"2024":{"Andaluc\u00eda":{"AVES":175988916,"BOVINO":85971,"CAPRINO":495173,"CONEJOS":null,"EQUINO":null,"OVINO":446343,"PORCINO":3208434},"Arag\u00f3n":{"AVES":2391844,"BOVINO":122662,"CAPRINO":19159,"CONEJOS":null,"EQUINO":null,"OVINO":853927,"PORCINO":11255883},"Asturias":{"AVES":0,"BOVINO":54132,"CAPRINO":2254,"CONEJOS":0,"EQUINO":516,"OVINO":6933,"PORCINO":44622},"Canarias":{"AVES":5277956,"BOVINO":12060,"CAPRINO":114335,"CONEJOS":54620,"EQUINO":0,"OVINO":10768,"PORCINO":53000},"Cantabria":{"AVES":0,"BOVINO":null,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":79029589,"BOVINO":414828,"CAPRINO":82793,"CONEJOS":null,"EQUINO":3151,"OVINO":2698034,"PORCINO":6158261},"Castilla-La Mancha":{"AVES":31588606,"BOVINO":185034,"CAPRINO":77354,"CONEJOS":null,"EQUINO":0,"OVINO":999333,"PORCINO":4030725},"Catalunya":{"AVES":200398343,"BOVINO":535444,"CAPRINO":64267,"CONEJOS":4922048,"EQUINO":1315,"OVINO":930050,"PORCINO":22462985},"Comunitat Valenciana":{"AVES":99338205,"BOVINO":280909,"CAPRINO":30219,"CONEJOS":null,"EQUINO":3653,"OVINO":484425,"PORCINO":937553},"Extremadura":{"AVES":42003711,"BOVINO":95896,"CAPRINO":5730,"CONEJOS":0,"EQUINO":0,"OVINO":210961,"PORCINO":498642},"Galicia":{"AVES":100949979,"BOVINO":366937,"CAPRINO":4389,"CONEJOS":null,"EQUINO":141,"OVINO":23280,"PORCINO":902173},"Illes Balears":{"AVES":133859,"BOVINO":6624,"CAPRINO":4082,"CONEJOS":2762,"EQUINO":0,"OVINO":124081,"PORCINO":86874},"La Rioja":{"AVES":null,"BOVINO":null,"CAPRINO":null,"CONEJOS":0,"EQUINO":null,"OVINO":null,"PORCINO":null},"Madrid":{"AVES":null,"BOVINO":118109,"CAPRINO":null,"CONEJOS":0,"EQUINO":0,"OVINO":null,"PORCINO":null},"Navarra":{"AVES":62230549,"BOVINO":61950,"CAPRINO":3982,"CONEJOS":null,"EQUINO":null,"OVINO":203196,"PORCINO":null},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":35531,"CAPRINO":2623,"CONEJOS":null,"EQUINO":157,"OVINO":62962,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":null,"BOVINO":72648,"CAPRINO":126166,"CONEJOS":null,"EQUINO":0,"OVINO":520909,"PORCINO":3853814}},"2025":{"Andaluc\u00eda":{"AVES":173785940,"BOVINO":79826,"CAPRINO":403305,"CONEJOS":null,"EQUINO":null,"OVINO":448765,"PORCINO":3339677},"Arag\u00f3n":{"AVES":2195834,"BOVINO":117808,"CAPRINO":19638,"CONEJOS":null,"EQUINO":null,"OVINO":848955,"PORCINO":12206889},"Asturias":{"AVES":null,"BOVINO":47590,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":null,"PORCINO":39323},"Canarias":{"AVES":null,"BOVINO":11228,"CAPRINO":36124,"CONEJOS":57257,"EQUINO":null,"OVINO":11250,"PORCINO":55288},"Cantabria":{"AVES":null,"BOVINO":null,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":null,"PORCINO":null},"Castilla y Le\u00f3n":{"AVES":85205937,"BOVINO":400314,"CAPRINO":75338,"CONEJOS":null,"EQUINO":3803,"OVINO":2408515,"PORCINO":6145754},"Castilla-La Mancha":{"AVES":33699265,"BOVINO":168561,"CAPRINO":77025,"CONEJOS":null,"EQUINO":null,"OVINO":957060,"PORCINO":4195709},"Catalunya":{"AVES":207734238,"BOVINO":542612,"CAPRINO":56914,"CONEJOS":4053472,"EQUINO":1239,"OVINO":850785,"PORCINO":22806259},"Comunitat Valenciana":{"AVES":104094985,"BOVINO":268261,"CAPRINO":32317,"CONEJOS":2204586,"EQUINO":null,"OVINO":480627,"PORCINO":949461},"Extremadura":{"AVES":39315183,"BOVINO":null,"CAPRINO":3015,"CONEJOS":null,"EQUINO":null,"OVINO":226308,"PORCINO":486487},"Galicia":{"AVES":106380424,"BOVINO":334509,"CAPRINO":4926,"CONEJOS":null,"EQUINO":238,"OVINO":24347,"PORCINO":809790},"Illes Balears":{"AVES":131671,"BOVINO":5816,"CAPRINO":3724,"CONEJOS":null,"EQUINO":0,"OVINO":98621,"PORCINO":87953},"La Rioja":{"AVES":null,"BOVINO":8624,"CAPRINO":13111,"CONEJOS":null,"EQUINO":null,"OVINO":216902,"PORCINO":9418},"Madrid":{"AVES":26784676,"BOVINO":108676,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":63603,"PORCINO":null},"Navarra":{"AVES":62344169,"BOVINO":62413,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":193685,"PORCINO":50855},"Pa\u00eds Vasco":{"AVES":null,"BOVINO":32029,"CAPRINO":null,"CONEJOS":null,"EQUINO":null,"OVINO":48059,"PORCINO":null},"Regi\u00f3n de Murcia":{"AVES":30407487,"BOVINO":74748,"CAPRINO":125139,"CONEJOS":null,"EQUINO":null,"OVINO":637088,"PORCINO":4505699}}},"y26":{"AVES":607742022,"PORCINO":36948014,"CONEJOS":17071681,"OVINO":4487765,"BOVINO":1560698,"CAPRINO":537609,"EQUINO":19962},"y25_8":{"AVES":586148236,"PORCINO":36462279,"CONEJOS":17490300,"OVINO":4890056,"BOVINO":1576693,"CAPRINO":541933,"EQUINO":18562}};
+const SP = ["AVES","PORCINO","CONEJOS","OVINO","BOVINO","CAPRINO","EQUINO"];
+const NAMES = {
+  es: {AVES:"Aves (pollos, pavos, patos…)",PORCINO:"Cerdos",CONEJOS:"Conejos",OVINO:"Ovejas y corderos",BOVINO:"Vacas y terneros",CAPRINO:"Cabras y cabritos",EQUINO:"Caballos",ALL:"Todos"},
+  en: {AVES:"Birds (chickens, turkeys, ducks…)",PORCINO:"Pigs",CONEJOS:"Rabbits",OVINO:"Sheep and lambs",BOVINO:"Cows and calves",CAPRINO:"Goats and kids",EQUINO:"Horses",ALL:"All"}
+};
+const SHORT = {
+  es: {AVES:"Aves",PORCINO:"Cerdos",CONEJOS:"Conejos",OVINO:"Ovejas",BOVINO:"Vacas",CAPRINO:"Cabras",EQUINO:"Caballos",ALL:"Todos"},
+  en: {AVES:"Birds",PORCINO:"Pigs",CONEJOS:"Rabbits",OVINO:"Sheep",BOVINO:"Cows",CAPRINO:"Goats",EQUINO:"Horses",ALL:"All"}
+};
+const T = {
+  es: {
+    kicker:"España · datos oficiales del MAPA", heroLabel:"Animales matados en mataderos de España en 2025",
+    heroSub1:"Cada cifra de esta página es un individuo.", heroSub2:"Y los peces no están incluidos.",
+    perDay:"Al día", perSec:"Por segundo", since:"Desde que abriste esta página",
+    spTitle:"Quiénes son", spLede:"Animales matados en 2025, por especie, en miles (56.005 mil = 56 millones). Las aves son casi 9 de cada 10.",
+    trTitle:"Desde 2004", trLede:"Elige una especie.",
+    mCount:"Número de animales", mIndex:"Cambio en %", vs:"respecto a", idxNote:"Cada línea compara una especie con su propia cifra del primer año: 0 % es igual, −50 % es la mitad de animales, +50 % es la mitad más. Las líneas grises son las demás especies.",
+    rgTitle:"Dónde ocurre", rgLede:"Por comunidad autónoma, en miles de animales. Elige una especie y un año.",
+    allSp:"Todas las especies", atLeast:"Al menos", hiddenSp:"Ocultas (DC)", allNote:"«≥» significa que alguna especie de esa comunidad es confidencial, así que el total real es mayor.",
+    rgFact:(y,p)=>`En ${y}, Cataluña mató más cerdos que ninguna otra comunidad: el ${p} de toda España.`,
+    species:"Especie", year:"Año", tableToggle:"Ver como tabla",
+    nowTitle:"2026 hasta ahora", nowLede:"Enero a agosto, datos provisionales del boletín mensual.",
+    c26:"Ene–ago 2026", c25:"Ene–ago 2025", cDiff:"Diferencia",
+    mTitle:"Cómo se hizo",
+    m1h:"La fuente", m1p:"La Encuesta de sacrificio de ganado del Ministerio de Agricultura (MAPA), que pregunta cada mes a los mataderos cuántos animales matan. Tablas anuales 2004–2025 y boletín mensual de agosto de 2026.",
+    m2h:"Qué no aparece", m2p:"Los peces y otros animales acuáticos no están en esta encuesta, y las estadísticas de pesca se publican en toneladas, no en individuos. Tampoco aparecen los animales que mueren antes de llegar al matadero.",
+    m3h:"Datos confidenciales", m3p:"El MAPA oculta algunas cifras regionales (marcadas «DC») para que no se pueda identificar a un matadero concreto. Aquí se muestran como confidenciales, nunca como cero. Por eso la suma de las regiones es menor que el total de España.",
+    m4h:"Unidades y totales", m4p:"Hasta 2024 el MAPA da las aves y los conejos en miles; aquí todo está en animales individuales. Todas las cifras son de animales matados en mataderos. No incluyen la estimación de «otros sacrificios» fuera de los mataderos, porque el MAPA cambió cómo la calcula y no se puede comparar entre años.",
+    src:"Fuente:", credit:"Proyecto de Sofía Díaz Vázquez. Datos limpiados con Python (pandas).",
+    dc:"Confidencial (DC)", region:"Comunidad", animals:"Animales", perDayTip:"al día",
+    trNote:(a,b,y0,y1,p)=>`De ${a} en ${y0} a ${b} en ${y1}: ${p}.`,
+    rgNote:(k,t,pct)=>`Las comunidades con cifra visible suman ${k} de ${t} en toda España (${pct}). El resto está oculto como confidencial.`,
+    million:"M", up:"más", down:"menos"
+  },
+  en: {
+    kicker:"Spain · official MAPA data", heroLabel:"Animals killed in Spain's slaughterhouses in 2025",
+    heroSub1:"Every number on this page is an individual.", heroSub2:"And fishes aren't included.",
+    perDay:"Per day", perSec:"Per second", since:"Since you opened this page",
+    spTitle:"Who they are", spLede:"Animals killed in 2025, by species, in thousands (56,005k = 56 million). Birds are almost 9 in 10.",
+    trTitle:"Since 2004", trLede:"Pick a species.",
+    mCount:"Number of animals", mIndex:"% change", vs:"vs", idxNote:"Each line compares a species with its own number in the first year: 0% is the same, −50% is half as many animals, +50% is half again as many. Grey lines are the other species.",
+    rgTitle:"Where it happens", rgLede:"By region, in thousands of animals. Pick a species and a year.",
+    allSp:"All species", atLeast:"At least", hiddenSp:"Hidden (DC)", allNote:"\"≥\" means some species in that region are confidential, so the real total is higher.",
+    rgFact:(y,p)=>`In ${y}, Catalonia killed more pigs than any other region: ${p} of all of Spain.`,
+    species:"Species", year:"Year", tableToggle:"Show as a table",
+    nowTitle:"2026 so far", nowLede:"January to August, provisional data from the monthly bulletin.",
+    c26:"Jan–Aug 2026", c25:"Jan–Aug 2025", cDiff:"Difference",
+    mTitle:"How it was made",
+    m1h:"The source", m1p:"The livestock slaughter survey by Spain's Ministry of Agriculture (MAPA), which asks slaughterhouses every month how many animals they kill. Yearly tables 2004–2025 and the August 2026 monthly bulletin.",
+    m2h:"What's missing", m2p:"Fish and other aquatic animals are not in this survey, and fishing statistics are published in tonnes, not individuals. Animals who die before reaching the slaughterhouse don't appear either.",
+    m3h:"Confidential data", m3p:"MAPA hides some regional figures (marked \"DC\") so that no single slaughterhouse can be identified. They are shown here as confidential, never as zero. That's why the regions add up to less than the Spain total.",
+    m4h:"Units and totals", m4p:"Until 2024, MAPA reports birds and rabbits in thousands; here everything is in individual animals. All figures are animals killed in slaughterhouses. They leave out MAPA's estimate of other slaughter outside slaughterhouses, because MAPA changed how it calculates it, so it can't be compared across years.",
+    src:"Source:", credit:"A project by Sofía Díaz Vázquez. Data cleaned with Python (pandas).",
+    dc:"Confidential (DC)", region:"Region", animals:"Animals", perDayTip:"per day",
+    trNote:(a,b,y0,y1,p)=>`From ${a} in ${y0} to ${b} in ${y1}: ${p}.`,
+    rgNote:(k,t,pct)=>`Regions with a visible figure add up to ${k} of ${t} in all of Spain (${pct}). The rest is hidden as confidential.`,
+    million:"M", up:"more", down:"fewer"
+  }
+};
+
+let lang = "es";
+try { const s = localStorage.getItem("lang"); if (s === "es" || s === "en") lang = s; else if (!(navigator.language || "").startsWith("es")) lang = "en"; } catch (e) {}
+if (location.hash === "#en") lang = "en"; if (location.hash === "#es") lang = "es";
+
+const loc = () => lang === "es" ? "es-ES" : "en-GB";
+const fmt = n => new Intl.NumberFormat(loc(), {useGrouping: true}).format(Math.round(n)).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1");
+function full(n) { // force grouping for 4-digit numbers in Spanish too
+  const s = Math.round(n).toString(); const sep = lang === "es" ? "." : ",";
+  return s.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+}
+function short(n) {
+  const dec = lang === "es" ? "," : ".";
+  if (n >= 1e9) return lang === "es" ? full(n/1e6) + " M" : (n/1e9).toFixed(2) + " bn";
+  if (n >= 1e6) return (n/1e6).toFixed(n >= 1e8 ? 0 : 1).replace(".", dec) + " M";
+  if (n >= 1e3) return (n/1e3).toFixed(n >= 1e5 ? 0 : 1).replace(".", dec) + (lang === "es" ? " mil" : "k");
+  return full(n);
+}
+// Value in thousands, the same unit for every bar: 22.806 mil / 22,806k. Under 1,000 keeps one decimal.
+function thou(n) {
+  const k = n / 1000, u = lang === "es" ? " mil" : "k";
+  if (n === 0) return "0";
+  return (k >= 1 ? full(k) : k.toFixed(1).replace(".", lang === "es" ? "," : ".")) + u;
+}
+const pct = x => (x*100).toFixed(1).replace(".", lang === "es" ? "," : ".") + " %";
+const yearTotal = y => SP.reduce((s, k) => s + DATA.nat[k][y], 0);
+const svgNS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent, text) { const e = document.createElementNS(svgNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+function clear(svg) { [...svg.querySelectorAll(":scope > :not(title)")].forEach(n => n.remove()); }
+
+/* tooltip */
+function tip(fig) { let t = fig.querySelector(".tip"); if (!t) { t = document.createElement("div"); t.className = "tip"; t.hidden = true; fig.appendChild(t); } return t; }
+function showTip(fig, html, evt) {
+  const t = tip(fig); t.innerHTML = html; t.hidden = false;
+  const r = fig.getBoundingClientRect(); let x = evt.clientX - r.left + 12, y = evt.clientY - r.top + 12;
+  if (x + t.offsetWidth > r.width) x = evt.clientX - r.left - t.offsetWidth - 12; if (x < 0) x = 4;
+  t.style.left = x + "px"; t.style.top = y + "px";
+}
+const hideTip = fig => { tip(fig).hidden = true; };
+
+/* hero + ticker */
+const total25 = yearTotal(2025);
+const perSecond = total25 / (365 * 86400);
+const start = performance.now();
+function hero() {
+  document.getElementById("heroNum").textContent = full(total25);
+  document.getElementById("perDay").textContent = short(total25 / 365);
+  document.getElementById("perSec").textContent = Math.round(perSecond);
+}
+function tick() { document.getElementById("since").textContent = full(Math.floor((performance.now() - start) / 1000 * perSecond)); }
+setInterval(tick, 250);
+
+/* species bars */
+function drawSpecies() {
+  const svg = document.getElementById("spSvg"), fig = document.getElementById("spFig"); clear(svg);
+  const W = Math.max(300, svg.clientWidth || 800), rowH = 44, top = 4, labelW = W < 500 ? 72 : 160, valW = W < 500 ? 100 : 120;
+  const rows = SP.map(k => ({k, v: DATA.nat[k][2025]})).sort((a, b) => b.v - a.v);
+  const H = top + rows.length * rowH; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const max = rows[0].v, x0 = labelW, x1 = W - valW;
+  rows.forEach((r, i) => {
+    const y = top + i * rowH, g = el("g", {class: "row"}, svg);
+    el("text", {x: 0, y: y + rowH/2 + 4, class: "cat"}, g, SHORT[lang][r.k]);
+    const w = Math.max(2, (r.v / max) * (x1 - x0));
+    el("rect", {x: x0, y: y + 10, width: w, height: rowH - 20, rx: 3, class: "bar"}, g);
+    el("text", {x: x0 + w + 8, y: y + rowH/2 + 4, class: "val"}, g, full(r.v / 1000) + (lang === "es" ? " mil" : "k"));
+    const hit = el("rect", {x: 0, y, width: W, height: rowH, class: "hit"}, g);
+    const html = `${NAMES[lang][r.k]}<br><b>${full(r.v)}</b><br>${short(r.v/365)} ${T[lang].perDayTip} · ${pct(r.v/total25)}`;
+    hit.addEventListener("mousemove", e => showTip(fig, html, e)); hit.addEventListener("mouseleave", () => hideTip(fig));
+  });
+}
+
+/* trend line */
+let trSel = "ALL", trMode = "count";
+function trSeries(k) { const ys = Object.keys(DATA.nat.AVES).map(Number).sort(); return ys.map(y => ({y, v: k === "ALL" ? yearTotal(y) : DATA.nat[k][y]})); }
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); const m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p; }
+function drawChips() {
+  const box = document.getElementById("trChips"); box.innerHTML = "";
+  ["ALL", ...SP].forEach(k => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = SHORT[lang][k];
+    b.setAttribute("aria-pressed", String(k === trSel)); b.addEventListener("click", () => { trSel = k; drawChips(); drawTrend(); });
+    box.appendChild(b);
+  });
+}
+function drawTrend() {
+  const svg = document.getElementById("trSvg"), fig = document.getElementById("trFig"); clear(svg);
+  const W = Math.max(300, svg.clientWidth || 800), H = W < 500 ? 260 : 340, L = 64, R = W < 500 ? 16 : 70, Tp = 16, B = 32; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const keys = ["ALL", ...SP], all = Object.fromEntries(keys.map(k => [k, trSeries(k)]));
+  const s = all[trSel], n = s.length, idx = trMode === "index";
+  const val = (k, i) => idx ? (all[k][i].v / all[k][0].v - 1) : all[k][i].v;
+  let lo = 0, hi;
+  if (idx) { const vs = keys.flatMap(k => all[k].map((_, i) => val(k, i))); lo = Math.min(0, ...vs); hi = Math.max(0, ...vs); const step = niceMax((hi - lo) / 4); lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step; }
+  else hi = niceMax(Math.max(...s.map(d => d.v)) * 1.05);
+  const X = i => L + i * (W - L - R) / (n - 1), Y = v => Tp + (1 - (v - lo) / (hi - lo)) * (H - Tp - B);
+  const ticks = idx ? Math.round((hi - lo) / niceMax((hi - lo) / 4)) : 4;
+  for (let j = 0; j <= ticks; j++) {
+    const v = lo + (hi - lo) * j / ticks, y = Y(v);
+    el("line", {x1: L, x2: W - R, y1: y, y2: y, class: Math.abs(v) < 1e-9 ? "axis" : "gridline"}, svg);
+    el("text", {x: L - 8, y: y + 4, "text-anchor": "end"}, svg, idx ? (v > 0 ? "+" : v < 0 ? "−" : "") + Math.round(Math.abs(v) * 100) + " %" : short(v));
+  }
+  const every = Math.ceil(n / (W < 500 ? 4 : 11));
+  s.forEach((d, i) => { if ((i % every === 0 && n - 1 - i > every / 2) || i === n - 1) el("text", {x: X(i), y: H - 8, "text-anchor": "middle"}, svg, d.y); });
+  const line = k => all[k].map((_, i) => `${X(i)},${Y(val(k, i))}`).join(" ");
+  if (idx) keys.filter(k => k !== trSel).forEach(k => el("polyline", {points: line(k), class: "ghost"}, svg));
+  else el("polygon", {points: `${X(0)},${Y(0)} ${line(trSel)} ${X(n-1)},${Y(0)}`, class: "area", opacity: 0.6}, svg);
+  el("polyline", {points: line(trSel), class: "line"}, svg);
+  el("circle", {cx: X(n-1), cy: Y(val(trSel, n-1)), r: 5, class: "dot"}, svg);
+  if (idx && W >= 500) el("text", {x: X(n-1) + 10, y: Y(val(trSel, n-1)) + 4, class: "val"}, svg, SHORT[lang][trSel]);
+  const cross = el("line", {y1: Tp, y2: H - B, class: "cross", visibility: "hidden"}, svg);
+  const hov = el("circle", {r: 5, class: "dot", visibility: "hidden"}, svg);
+  const hit = el("rect", {x: L, y: Tp, width: W - L - R, height: H - Tp - B, class: "hit"}, svg);
+  const sign = c => (c >= 0 ? "+" : "−") + pct(Math.abs(c));
+  hit.addEventListener("mousemove", e => {
+    const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; const q = p.matrixTransform(svg.getScreenCTM().inverse());
+    const i = Math.max(0, Math.min(n - 1, Math.round((q.x - L) / ((W - L - R) / (n - 1)))));
+    cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i)); cross.setAttribute("visibility", "visible");
+    hov.setAttribute("cx", X(i)); hov.setAttribute("cy", Y(val(trSel, i))); hov.setAttribute("visibility", "visible");
+    const html = idx
+      ? `<b>${s[i].y}</b> · ${T[lang].vs} ${s[0].y}<br>` + keys.map(k => [k, val(k, i)]).sort((a, b) => b[1] - a[1]).map(([k, c]) => (k === trSel ? "<b>" : "") + `${SHORT[lang][k]}: ${sign(c)}` + (k === trSel ? "</b>" : "")).join("<br>")
+      : `${SHORT[lang][trSel]} · ${s[i].y}<br><b>${full(s[i].v)}</b>`;
+    showTip(fig, html, e);
+  });
+  hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); hov.setAttribute("visibility", "hidden"); hideTip(fig); });
+  const a = s[0], b = s[n - 1];
+  document.getElementById("trNote").textContent = T[lang].trNote(full(a.v), full(b.v), a.y, b.y, sign((b.v - a.v) / a.v)) + (idx ? " " + T[lang].idxNote : "");
+  document.querySelectorAll("#trMode button").forEach(bt => { bt.setAttribute("aria-pressed", String(bt.dataset.mode === trMode)); bt.textContent = T[lang][bt.dataset.mode === "count" ? "mCount" : "mIndex"]; });
+}
+/* regions */
+function fillSelects() {
+  const sp = document.getElementById("rgSpecies"), yr = document.getElementById("rgYear");
+  const sv = sp.value || "PORCINO", yv = yr.value || "2025";
+  sp.innerHTML = ["ALL", ...SP].map(k => `<option value="${k}">${k === "ALL" ? T[lang].allSp : SHORT[lang][k]}</option>`).join("");
+  yr.innerHTML = Object.keys(DATA.reg).sort().reverse().map(y => `<option value="${y}">${y}</option>`).join("");
+  sp.value = sv; yr.value = yv;
+}
+function drawRegions() {
+  const k = document.getElementById("rgSpecies").value, y = document.getElementById("rgYear").value;
+  const svg = document.getElementById("rgSvg"), fig = document.getElementById("rgFig"); clear(svg);
+  const rows = Object.entries(DATA.reg[y]).map(([r, o]) => {
+    if (k !== "ALL") return {r, v: o[k]};
+    // All species: add up the visible numbers; if some are hidden (DC), the real total is "at least" this.
+    const hidden = SP.filter(s => o[s] == null), v = SP.reduce((s, sp) => s + (o[sp] || 0), 0);
+    return {r, v: v || (hidden.length ? null : 0), hidden};
+  });
+  rows.sort((a, b) => (b.v ?? -1) - (a.v ?? -1));
+  const W = Math.max(300, svg.clientWidth || 800), rowH = 30, labelW = W < 500 ? 128 : 190, valW = W < 500 ? 116 : 140, H = rows.length * rowH; svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const max = Math.max(...rows.map(d => d.v || 0)) || 1, x0 = labelW, x1 = W - valW, nat = k === "ALL" ? SP.reduce((s, sp) => s + DATA.nat[sp][y], 0) : DATA.nat[k][y];
+  rows.forEach((d, i) => {
+    const yy = i * rowH, g = el("g", {class: "row"}, svg);
+    el("text", {x: 0, y: yy + rowH/2 + 4, class: "cat"}, g, W < 500 && d.r.length > 16 ? d.r.replace("Comunitat ", "C. ").replace("Castilla-La Mancha", "C.-La Mancha").replace("Castilla y León", "Cast. y León").replace("Región de ", "") : d.r);
+    let html;
+    if (d.v == null) {
+      el("text", {x: x0, y: yy + rowH/2 + 4}, g, W < 500 ? "DC" : T[lang].dc);
+      html = `${d.r}<br>${T[lang].dc}`;
+    } else {
+      const w = d.v > 0 ? Math.max(2, d.v / max * (x1 - x0)) : 0;
+      if (w) el("rect", {x: x0, y: yy + 7, width: w, height: rowH - 14, rx: 2, class: "bar"}, g);
+      const partial = d.hidden && d.hidden.length > 0;
+      el("text", {x: x0 + w + 8, y: yy + rowH/2 + 4, class: "val"}, g, (partial ? "≥ " : "") + thou(d.v));
+      html = `${d.r} · ${y}<br><b>${partial ? T[lang].atLeast + " " : ""}${full(d.v)}</b><br>${pct(d.v / nat)}`
+        + (partial ? `<br>${T[lang].hiddenSp}: ${d.hidden.map(s => SHORT[lang][s]).join(", ")}` : "");
+    }
+    const hit = el("rect", {x: 0, y: yy, width: W, height: rowH, class: "hit"}, g);
+    hit.addEventListener("mousemove", e => showTip(fig, html, e)); hit.addEventListener("mouseleave", () => hideTip(fig));
+  });
+  const fact = document.getElementById("rgFact"), cat = DATA.reg[y]["Catalunya"][k];
+  fact.hidden = !(k === "PORCINO" && cat != null);
+  if (!fact.hidden) fact.textContent = T[lang].rgFact(y, pct(cat / nat));
+  const known = rows.reduce((s, d) => s + (d.v || 0), 0);
+  document.getElementById("rgNote").textContent = T[lang].rgNote(full(known), full(nat), pct(known / nat)) + (k === "ALL" ? " " + T[lang].allNote : "");
+  document.getElementById("rgTable").innerHTML =
+    `<thead><tr><th>${T[lang].region}</th>${SP.map(s => `<th>${SHORT[lang][s]}</th>`).join("")}</tr></thead><tbody>` +
+    Object.entries(DATA.reg[y]).map(([r, o]) => `<tr><td>${r}</td>${SP.map(s => `<td>${o[s] == null ? "DC" : full(o[s])}</td>`).join("")}</tr>`).join("") + "</tbody>";
+}
+
+/* 2026 */
+function drawNow() {
+  const a = SP.reduce((s, k) => s + DATA.y26[k], 0), b = SP.reduce((s, k) => s + DATA.y25_8[k], 0), d = a - b;
+  document.getElementById("c26").textContent = short(a);
+  document.getElementById("c25").textContent = short(b);
+  document.getElementById("cDiff").textContent = (d >= 0 ? "+" : "−") + short(Math.abs(d)) + " (" + (d >= 0 ? "+" : "−") + pct(Math.abs(d) / b) + ")";
+}
+
+/* language */
+function render() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(n => { const v = T[lang][n.dataset.i18n]; if (typeof v === "string") n.textContent = v; });
+  document.getElementById("lang-es").setAttribute("aria-pressed", String(lang === "es"));
+  document.getElementById("lang-en").setAttribute("aria-pressed", String(lang === "en"));
+  document.title = lang === "es" ? "Contados uno a uno" : "Counted one by one";
+  hero(); tick(); drawSpecies(); drawChips(); drawTrend(); fillSelects(); drawRegions(); drawNow();
+}
+function setLang(l) { lang = l; try { localStorage.setItem("lang", l); } catch (e) {} render(); }
+document.getElementById("lang-es").addEventListener("click", () => setLang("es"));
+document.getElementById("lang-en").addEventListener("click", () => setLang("en"));
+document.getElementById("rgSpecies").addEventListener("change", drawRegions);
+document.querySelectorAll("#trMode button").forEach(bt => bt.addEventListener("click", () => { trMode = bt.dataset.mode; drawTrend(); }));
+document.getElementById("rgYear").addEventListener("change", drawRegions);
+render();
+let rz; window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { drawSpecies(); drawTrend(); drawRegions(); }, 150); });
+</script>
+
+</body>
+</html>
